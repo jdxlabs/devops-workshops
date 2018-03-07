@@ -18,10 +18,10 @@ resource "aws_vpc" "vpc" {
 resource "aws_subnet" "public_subnet" {
   vpc_id = "${aws_vpc.vpc.id}"
   cidr_block = "${var.public_subnet_cidr}"
-  availability_zone = "${var.availability_zone}"
+  availability_zone = "${var.zones[0]}"
   tags {
-    Name = "${var.project_name}-${var.region}-${var.initials}-${var.availability_zone}-public"
-    Description = "${var.project_name}-${var.region}-${var.initials} public subnet in AZ ${var.availability_zone}"
+    Name = "${aws_vpc.vpc.tags.Name}-${var.zones[0]}-public"
+    Description = "${aws_vpc.vpc.tags.Name} public subnet in AZ ${var.zones[0]}"
   }
 }
 

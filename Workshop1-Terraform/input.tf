@@ -20,7 +20,3 @@ variable "vpc_cidr" {
 variable "public_subnet_cidr" {
   default = "10.0.0.0/24"
 }
-
-variable "availability_zone" {
-  default = "us-east-1a"
-}
