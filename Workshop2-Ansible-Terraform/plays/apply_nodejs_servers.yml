@@ -34,7 +34,7 @@
 
     - name: Launch daemon with pm2
       shell: >-
-        pm2 start app.js
+        pm2 start server.js
       args:
         chdir: "{{ app_dir }}"
       changed_when: false
