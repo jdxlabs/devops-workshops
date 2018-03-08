@@ -46,4 +46,5 @@ ssh -F env-ssh.cfg admin@nodejs-server-0
 
 ansible-playbook plays/apply_basics.yml
 ansible-playbook plays/apply_nodejs.yml
+ansible-playbook plays/apply_nodejs_servers.yml
 ```

@@ -1,5 +1,5 @@
 ---
-- hosts: "{{ target|default('all') }}"
+- hosts: "{{ target|default('nodejs-servers') }}"
   become: yes
   gather_facts: no
 
