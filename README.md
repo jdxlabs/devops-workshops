@@ -42,4 +42,8 @@ ansible -m ping all
 # }
 
 ssh -F env-ssh.cfg admin@nodejs-server-0
+# should access to the server
+
+ansible-playbook plays/apply_basics.yml
+ansible-playbook plays/apply_nodejs.yml
 ```
