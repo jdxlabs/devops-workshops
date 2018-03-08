@@ -1,0 +1,3 @@
+---
+target_name: 'env'
+ssh_key_name: 'sandbox-aws'
