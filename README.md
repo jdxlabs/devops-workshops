@@ -27,7 +27,7 @@ terraform destroy -var-file=env.tfvars
 ```
 
 
-## Worshop2 : Terraform
+## Worshop2 : Ansible-Terraform
 
 ### Commands
 ```
@@ -47,4 +47,6 @@ ssh -F env-ssh.cfg admin@nodejs-server-0
 ansible-playbook plays/apply_basics.yml
 ansible-playbook plays/apply_nodejs.yml
 ansible-playbook plays/apply_nodejs_servers.yml
+
+ansible-playbook plays/destroy.yml -e layer_name=main
 ```
