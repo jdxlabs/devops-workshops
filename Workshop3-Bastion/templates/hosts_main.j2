@@ -1,3 +1,6 @@
+[bastion]
+bastion
+
 [nodejs-servers]
 {% for instance in all_terraform_outputs.nodejs_servers.value %}
 nodejs-server-{{ loop.index0 }}

@@ -172,46 +172,36 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
 }
 
-# resource "aws_instance" "nodejs_server" {
-#   count         = "${var.instance["nb"]}"
-#   ami           = "${data.aws_ami.debian.id}"
-#   instance_type = "${var.instance["type"]}"
-#   key_name      = "${aws_key_pair.bastion_keypair.key_name}"
+resource "aws_instance" "nodejs_server" {
+  count         = "${var.instance["nb"]}"
+  ami           = "${data.aws_ami.debian.id}"
+  instance_type = "${var.instance["type"]}"
+  key_name      = "${aws_key_pair.bastion_keypair.key_name}"
 
+  root_block_device = {
+    volume_size = "${var.instance["root_hdd_size"]}"
+    volume_type = "${var.instance["root_hdd_type"]}"
+  }
 
-#   root_block_device = {
-#     volume_size = "${var.instance["root_hdd_size"]}"
-#     volume_type = "${var.instance["root_hdd_type"]}"
-#   }
+  ebs_block_device = {
+    volume_size = "${var.instance["ebs_hdd_size"]}"
+    volume_type = "${var.instance["ebs_hdd_type"]}"
+    device_name = "${var.instance["ebs_hdd_name"]}"
+  }
 
+  subnet_id = "${aws_subnet.public_subnet.id}"
 
-#   ebs_block_device = {
-#     volume_size = "${var.instance["ebs_hdd_size"]}"
-#     volume_type = "${var.instance["ebs_hdd_type"]}"
-#     device_name = "${var.instance["ebs_hdd_name"]}"
-#   }
+  vpc_security_group_ids = [
+    "${aws_security_group.bastion_realm.id}",
+  ]
 
+  user_data = "${data.template_file.user-data.rendered}"
 
-#   subnet_id = "${aws_subnet.public_subnet.id}"
+  lifecycle {
+    ignore_changes = ["ami", "instance_type", "user_data", "root_block_device", "ebs_block_device"]
+  }
 
-
-#   vpc_security_group_ids = [
-#     "${aws_security_group.bastion_realm.id}",
-#   ]
-
-
-#   user_data = "${data.template_file.user-data.rendered}"
-
-
-#   lifecycle {
-#     ignore_changes = ["ami", "instance_type", "user_data", "root_block_device", "ebs_block_device"]
-#   }
-
-
-#   tags {
-#     Name = "${var.project_name}-${var.initials}-nodejs-server-${count.index}"
-#   }
-
-
-# }
-
+  tags {
+    Name = "${var.project_name}-${var.initials}-nodejs-server-${count.index}"
+  }
+}
