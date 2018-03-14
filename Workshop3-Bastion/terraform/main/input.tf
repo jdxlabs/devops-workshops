@@ -1,4 +1,3 @@
-
 variable "initials" {}
 
 variable "public_key" {}
@@ -20,7 +19,11 @@ variable "vpc_cidr" {
 }
 
 variable "public_subnet_cidr" {
-  default = "10.0.0.0/24"
+  default = "10.0.10.0/24"
+}
+
+variable "private_subnet_cidr" {
+  default = "10.0.110.0/24"
 }
 
 variable "authorized_ips" {
@@ -33,14 +36,17 @@ variable "instance" {
 
 data "aws_ami" "debian" {
   most_recent = true
+
   filter {
     name   = "name"
     values = ["debian-stretch-hvm-x86_64-gp2*"]
   }
+
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+
   owners = ["379101102735"] # Debian Project
 }
 
