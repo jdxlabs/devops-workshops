@@ -94,16 +94,36 @@ resource "aws_route_table_association" "public_subnet_to_gateway" {
   route_table_id = "${aws_route_table.main.id}"
 }
 
-# Security group
-resource "aws_security_group" "nodejs-server-group" {
-  name_prefix = "nodejs-server-group"
+# Security groups
+
+resource "aws_security_group" "bastion_ingress" {
+  name_prefix = "${var.project_name}-${var.initials}-bastion-ingress"
   vpc_id      = "${aws_vpc.vpc.id}"
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "TCP"
-    cidr_blocks = ["${var.authorized_ips}"]
+    cidr_blocks = ["${var.bastion_ingress_cidr}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "bastion_realm" {
+  name_prefix = "${var.project_name}-${var.initials}-bastion-realm"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "TCP"
+    security_groups = ["${aws_security_group.bastion_ingress.id}"]
   }
 
   ingress {
@@ -123,16 +143,40 @@ resource "aws_security_group" "nodejs-server-group" {
 
 # EC2
 
-resource "aws_key_pair" "nodejs_server_keypair" {
+resource "aws_key_pair" "bastion_keypair" {
   key_name   = "${var.project_name}-${var.initials}"
   public_key = "${var.public_key}"
+}
+
+resource "aws_instance" "bastion" {
+  count         = "1"
+  ami           = "${data.aws_ami.debian.id}"
+  instance_type = "t2.medium"
+  key_name      = "${aws_key_pair.bastion_keypair.key_name}"
+
+  root_block_device = {
+    volume_size = "8"
+    volume_type = "gp2"
+  }
+
+  subnet_id = "${aws_subnet.public_subnet.id}"
+
+  vpc_security_group_ids = [
+    "${aws_security_group.bastion_ingress.id}",
+  ]
+
+  tags {
+    Name = "${var.project_name}-${var.initials}-bastion"
+  }
+
+  associate_public_ip_address = true
 }
 
 # resource "aws_instance" "nodejs_server" {
 #   count         = "${var.instance["nb"]}"
 #   ami           = "${data.aws_ami.debian.id}"
 #   instance_type = "${var.instance["type"]}"
-#   key_name      = "${aws_key_pair.nodejs_server_keypair.key_name}"
+#   key_name      = "${aws_key_pair.bastion_keypair.key_name}"
 
 
 #   root_block_device = {
@@ -152,7 +196,7 @@ resource "aws_key_pair" "nodejs_server_keypair" {
 
 
 #   vpc_security_group_ids = [
-#     "${aws_security_group.nodejs-server-group.id}",
+#     "${aws_security_group.bastion_realm.id}",
 #   ]
 
 
@@ -169,6 +213,5 @@ resource "aws_key_pair" "nodejs_server_keypair" {
 #   }
 
 
-#   associate_public_ip_address = true
 # }
 

@@ -26,7 +26,7 @@ variable "private_subnet_cidr" {
   default = "10.0.110.0/24"
 }
 
-variable "authorized_ips" {
+variable "bastion_ingress_cidr" {
   type = "list"
 }
 
