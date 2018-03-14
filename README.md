@@ -50,3 +50,17 @@ ansible-playbook plays/apply_nodejs_servers.yml
 
 ansible-playbook plays/destroy.yml -e layer_name=main
 ```
+
+
+## Worshop3 : Bastion
+
+### Commands
+```
+cd ./Workshop3-Bastion
+ansible-playbook plays/build.yml -e layer_name=main
+
+ssh -F env-ssh.cfg admin@nodejs-server-0
+# should access to the server
+
+ansible-playbook plays/destroy.yml -e layer_name=main
+```
