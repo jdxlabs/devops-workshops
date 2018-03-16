@@ -1,0 +1,69 @@
+- hosts: localhost
+  become: no
+  gather_facts: no
+
+  vars_files:
+    - "{{ playbook_dir }}/../envvars.yml"
+
+  pre_tasks:
+    - assert:
+        that:
+          - "{{ layer_name is defined }}"
+        msg: "Missing at least an environment var"
+
+    - file:
+        path: "{{ playbook_dir }}/../{{ target_name }}/inventories"
+        state: directory
+        mode: 0755
+
+    - set_fact:
+        tf_common_vars: >-
+          -var-file={{ playbook_dir }}/../terraform/{{ target_name }}.tfvars
+
+  tasks:
+    - name: terraform plan
+      shell: >-
+        rm -rf {{ playbook_dir }}/../terraform/{{ layer_name }}/.terraform
+        &&
+        terraform init -force-copy
+        &&
+        terraform get -update
+        &&
+        terraform plan {{ tf_common_vars }}
+      args:
+        chdir: "{{ playbook_dir }}/../terraform/{{ layer_name }}"
+        warn: no
+      register: tf_plan
+
+    - pause:
+        prompt: |-
+          ############### READ CAREFULLY
+
+          {{ tf_plan.stdout }}
+
+          Type 'apply' if you want to continue
+      register: prompted
+      when: not (auto_apply|default(false))
+
+    - meta: end_play
+      when:
+        - not (auto_apply|default(false))
+        - prompted is defined and prompted.user_input != 'apply'
+
+    - name: terraform apply
+      shell: >-
+        terraform apply -auto-approve {{ tf_common_vars }}
+      args:
+        chdir: "{{ playbook_dir }}/../terraform/{{ layer_name }}"
+
+    - name: Build inventories
+      include: "{{ playbook_dir }}/_build_inventories.yml"
+
+    - name: Checking for layer-specific tasks
+      stat:
+        path: "{{ playbook_dir }}/../terraform/{{ layer_name }}/deploy-tasks.yml"
+      register: deploy_tasks_file
+
+    - name: Including layer-specific tasks
+      include: "{{ playbook_dir }}/../terraform/{{ layer_name }}/deploy-tasks.yml"
+      when: deploy_tasks_file.stat.exists

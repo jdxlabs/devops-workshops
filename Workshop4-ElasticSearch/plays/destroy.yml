@@ -1,0 +1,41 @@
+- hosts: localhost
+  become: no
+  gather_facts: no
+
+  pre_tasks:
+    - assert:
+        that:
+          - "{{ layer_name is defined }}"
+        msg: "Missing at least an environment var"
+
+    - set_fact:
+        tf_common_vars: >-
+          -var-file={{ playbook_dir }}/../terraform/{{ target_name }}.tfvars
+  tasks:
+    - pause:
+        prompt: |-
+          Are you sure ?
+          Type 'yes' if you want to continue
+      register: prompted
+      when: not (auto_apply|default(false))
+
+    - meta: end_play
+      when:
+        - not (auto_apply|default(false))
+        - prompted is defined and prompted.user_input != 'yes'
+
+    - name: Clean hostfile for the layer
+      file:
+        state: absent
+        path: "{{ playbook_dir }}/../{{ target_name }}/inventories/hosts_{{ layer_name }}"
+
+    - name: terraform destroy
+      shell: >-
+        rm -rf {{ playbook_dir }}/../terraform/{{ layer_name }}/.terraform
+        &&
+        terraform init -force-copy
+        &&
+        terraform destroy -force {{ tf_common_vars }}
+      args:
+        chdir: "{{ playbook_dir }}/../terraform/{{ layer_name }}"
+        warn: no
