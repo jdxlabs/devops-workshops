@@ -1,5 +1,5 @@
 [bastion]
-bastion
+BASTION_AWS
 
 [nodejs-servers]
 nodejs-server-0
