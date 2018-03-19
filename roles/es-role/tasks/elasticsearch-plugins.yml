@@ -1,0 +1,49 @@
+---
+- name: Check installed elasticsearch plugins
+  shell: >-
+    ls {{es_home}}/plugins
+  register: installed_plugins
+  changed_when: false
+
+- set_fact:
+    plugins_reinstall: "{{ plugins_reinstall | default(false) }}"
+
+- set_fact:
+    plugins_to_remove: "{{ installed_plugins.stdout_lines | difference(es_plugins_ignored|json_query('[*].name')) | default([]) }}"
+- set_fact:
+    plugins_to_remove: "{{ plugins_to_remove | difference(es_plugins|json_query('[*].name')) }}"
+  when: not plugins_reinstall
+
+- set_fact:
+    plugins_to_install: "{{ es_plugins|json_query('[*].name') | difference(es_plugins_ignored|json_query('[*].name')) | default([]) }}"
+- set_fact:
+    plugins_to_install: "{{ plugins_to_install | difference(installed_plugins.stdout_lines) }}"
+  when: not plugins_reinstall
+
+- debug:
+    msg : "plugin to remove : {{ plugins_to_remove }} & to install : {{ plugins_to_install }}"
+
+- name: Remove elasticsearch plugins
+  become_user: "{{ es_user_superadmin }}"
+  shell: >-
+    {{ es_home }}/bin/elasticsearch-plugin remove {{ item }} --silent
+  with_items: "{{ plugins_to_remove }}"
+  environment:
+    CONF_DIR: "{{ es_conf_dir }}"
+    ES_INCLUDE: "{{ default_file }}"
+  notify: restart elasticsearch
+
+- name: Install elasticsearch plugins
+  become_user: "{{ es_user_superadmin }}"
+  shell: >-
+    {{ es_home }}/bin/elasticsearch-plugin install {{ item }} --batch --silent
+  register: plugin_installed
+  failed_when: "'ERROR' in plugin_installed.stdout"
+  with_items: "{{ plugins_to_install }}"
+  environment:
+    CONF_DIR: "{{ es_conf_dir }}"
+    ES_INCLUDE: "{{ default_file }}"
+  until: plugin_installed.rc == 0
+  retries: 5
+  delay: 5
+  notify: restart elasticsearch

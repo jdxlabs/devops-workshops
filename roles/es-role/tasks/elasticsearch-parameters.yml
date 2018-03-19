@@ -1,0 +1,23 @@
+# Check for mandatory parameters
+
+- fail: msg="es_instance_name must be specified and cannot be blank"
+  when: es_instance_name is not defined or es_instance_name == ''
+
+- fail: msg="es_proxy_port must be specified and cannot be blank when es_proxy_host is defined"
+  when: (es_proxy_port is not defined or es_proxy_port == '') and (es_proxy_host is defined and es_proxy_host != '')
+
+- debug: msg="WARNING - It is recommended you specify the parameter 'http.port'"
+  when: es_config['http.port'] is not defined
+
+- debug: msg="WARNING - It is recommended you specify the parameter 'transport.tcp.port'"
+  when: es_config['transport.tcp.port'] is not defined
+
+- debug: msg="WARNING - It is recommended you specify the parameter 'discovery.zen.ping.unicast.hosts'"
+  when: es_config['discovery.zen.ping.unicast.hosts'] is not defined
+
+#If the user attempts to lock memory they must specify a heap size
+- fail: msg="If locking memory with bootstrap.memory_lock a heap size must be specified"
+  when: es_config['bootstrap.memory_lock'] is defined and es_config['bootstrap.memory_lock'] == True and es_heap_size is not defined
+
+- set_fact:
+    m_lock_enabled: "{{ 'bootstrap.memory_lock' in es_config and es_config['bootstrap.memory_lock'] }}"

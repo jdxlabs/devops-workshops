@@ -1,0 +1,46 @@
+---
+- name: Create required directories
+  file:
+    path: "{{ item }}"
+    owner: "{{ es_user }}"
+    group: "{{ es_group }}"
+    state: directory
+  with_items:
+    - "{{ es_pid_dir }}"
+    - "{{ es_log_dir }}"
+    - "{{ es_conf_dir }}"
+    - "{{ es_data_dir }}"
+    - "/etc/elasticsearch/templates"
+
+- name: Render Systemd File for Instance
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
+    force: yes
+  with_items:
+    - src: "etc_default_elasticsearch.j2"
+      dest: "{{ default_file }}"
+    - src: "elasticsearch.service.j2"
+      dest: "{{ sysd_script }}"
+  notify:
+    - reload systemd configuration
+    - restart elasticsearch
+
+- name: Render Configuration File
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ es_user }}"
+    group: "{{ es_group }}"
+    mode: "0644"
+    force: yes
+  with_items:
+    - src: "elasticsearch-config.yml.j2"
+      dest: "{{ es_conf_dir }}/elasticsearch.yml"
+    - src: "jvm.options.j2"
+      dest: "{{ es_conf_dir }}/jvm.options"
+    - src: "log4j2.properties.j2"
+      dest: "{{ es_conf_dir }}/log4j2.properties"
+  register: config_updated
+  notify: restart elasticsearch

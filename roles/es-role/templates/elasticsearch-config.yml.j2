@@ -1,0 +1,39 @@
+
+{% if es_config %}
+{{ es_config | to_nice_yaml }}
+{% endif %}
+
+{% if es_config['cluster.name'] is not defined %}
+cluster.name: elasticsearch
+{% endif %}
+
+{% if es_config['node.name'] is not defined %}
+node.name: {{inventory_hostname}}-{{es_instance_name}}
+{% endif %}
+
+
+# xpack.graph.enabled: false
+# xpack.ml.enabled: false
+# xpack.monitoring.enabled: false
+# xpack.watcher.enabled: false
+
+# xpack.security.enabled: false
+# xpack.security.audit.enabled: false
+
+# anonymous user
+# xpack.security.authc:
+#   anonymous:
+#     username: anonymous
+#     roles: role_anonymous
+#     authz_exception: true
+
+action.destructive_requires_name: true
+
+path.conf: {{ es_conf_dir }}
+path.data: {{ es_data_dir }}
+path.logs: {{ es_log_dir }}
+
+repositories:
+    s3:
+        bucket: "{{ target_name }}-{{ target_region }}-{{ cluster_alias }}-snapshots"
+        region: "{{ target_region }}"

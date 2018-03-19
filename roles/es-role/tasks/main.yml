@@ -1,0 +1,30 @@
+---
+- include: elasticsearch-parameters.yml
+
+- include: java.yml
+
+- include: elasticsearch.yml
+  tags:
+    - install
+
+- include: elasticsearch-config.yml
+  tags:
+    - config
+
+- include: elasticsearch-plugins.yml
+  tags:
+    - plugins
+
+- meta: flush_handlers
+
+- service:
+    name: elasticsearch
+    state: started
+    enabled: true
+
+- name: Wait for elasticsearch to startup
+  wait_for:
+    host: "{{ es_api_host }}"
+    port: "{{ es_api_port }}"
+    delay: 5
+    connect_timeout: 1
