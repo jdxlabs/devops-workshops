@@ -1,6 +1,10 @@
 [bastion]
 BASTION_AWS
 
+[es_instances:children]
+es-masters
+es-workers
+
 [es-masters]
 {% for instance in all_terraform_outputs.es_masters.value %}
 es-master-{{ loop.index0 }}

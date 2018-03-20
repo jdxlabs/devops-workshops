@@ -1,0 +1,5 @@
+---
+cluster_name: "sandbox"
+
+es_plugins:
+  - name: "analysis-icu"

@@ -200,7 +200,7 @@ resource "aws_instance" "bastion" {
 
 resource "aws_instance" "es_masters" {
   count         = "${var.instances_es_masters["nb"]}"
-  ami           = "${data.aws_ami.debian.id}"
+  ami           = "${data.aws_ami.debian8.id}"
   instance_type = "${var.instances_es_masters["type"]}"
   key_name      = "${aws_key_pair.bastion_keypair.key_name}"
 
@@ -217,7 +217,7 @@ resource "aws_instance" "es_masters" {
   ]
 
   lifecycle {
-    ignore_changes = ["ami", "instance_type", "user_data", "root_block_device", "ebs_block_device"]
+    ignore_changes = ["instance_type", "user_data", "root_block_device", "ebs_block_device"]
   }
 
   tags {
@@ -228,7 +228,7 @@ resource "aws_instance" "es_masters" {
 
 resource "aws_instance" "es_workers" {
   count         = "${var.instances_es_workers["nb"]}"
-  ami           = "${data.aws_ami.debian.id}"
+  ami           = "${data.aws_ami.debian8.id}"
   instance_type = "${var.instances_es_workers["type"]}"
   key_name      = "${aws_key_pair.bastion_keypair.key_name}"
 
@@ -253,7 +253,7 @@ resource "aws_instance" "es_workers" {
   user_data = "${data.template_file.user-data.rendered}"
 
   lifecycle {
-    ignore_changes = ["ami", "instance_type", "user_data", "root_block_device", "ebs_block_device"]
+    ignore_changes = ["instance_type", "user_data", "root_block_device", "ebs_block_device"]
   }
 
   tags {

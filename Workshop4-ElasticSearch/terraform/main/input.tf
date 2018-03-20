@@ -54,6 +54,22 @@ data "aws_ami" "debian" {
   owners = ["379101102735"] # Debian Project
 }
 
+data "aws_ami" "debian8" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["debian-jessie-amd64-hvm-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["379101102735"] # Debian Project
+}
+
 data "template_file" "user-data" {
   template = <<EOF
 #cloud-config

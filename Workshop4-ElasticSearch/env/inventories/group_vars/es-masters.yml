@@ -1,0 +1,7 @@
+---
+es_node_data: false
+es_node_master: true
+es_node_ingest: false
+
+main_service: "es-cluster-master"
+es_heap_size: "2g" # half size of the RAM

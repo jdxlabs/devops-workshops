@@ -1,0 +1,8 @@
+---
+es_node_data: true
+es_node_master: false
+es_node_ingest: false
+
+main_service: "es-cluster-worker"
+es_heap_size: "2g" # half size of the RAM
+es_data_dir: "/mnt/data/elasticsearch"
