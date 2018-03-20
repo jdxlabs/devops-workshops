@@ -1,0 +1,16 @@
+---
+- name: Get instances list
+  shell: terraform output -json
+  args:
+    chdir: "{{ playbook_dir }}/../terraform/{{ layer_name }}"
+  register: raw_all_terraform_outputs
+  changed_when: no
+
+
+- set_fact:
+    all_terraform_outputs: "{{ (raw_all_terraform_outputs.stdout | from_json) }}"
+
+- name: Generating inventory
+  template:
+    src: "{{ playbook_dir }}/../templates/hosts_{{ layer_name }}.j2"
+    dest: "{{ playbook_dir }}/../{{ target_name }}/inventories/hosts_{{ layer_name }}"
