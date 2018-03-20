@@ -200,7 +200,7 @@ resource "aws_instance" "bastion" {
 
 resource "aws_instance" "es_masters" {
   count         = "${var.instances_es_masters["nb"]}"
-  ami           = "${data.aws_ami.debian8.id}"
+  ami           = "${data.aws_ami.debian.id}"
   instance_type = "${var.instances_es_masters["type"]}"
   key_name      = "${aws_key_pair.bastion_keypair.key_name}"
 
@@ -228,7 +228,7 @@ resource "aws_instance" "es_masters" {
 
 resource "aws_instance" "es_workers" {
   count         = "${var.instances_es_workers["nb"]}"
-  ami           = "${data.aws_ami.debian8.id}"
+  ami           = "${data.aws_ami.debian.id}"
   instance_type = "${var.instances_es_workers["type"]}"
   key_name      = "${aws_key_pair.bastion_keypair.key_name}"
 

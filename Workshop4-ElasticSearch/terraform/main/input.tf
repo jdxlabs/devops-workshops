@@ -43,22 +43,6 @@ data "aws_ami" "debian" {
 
   filter {
     name   = "name"
-    values = ["debian-stretch-hvm-x86_64-gp2*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["379101102735"] # Debian Project
-}
-
-data "aws_ami" "debian8" {
-  most_recent = true
-
-  filter {
-    name   = "name"
     values = ["debian-jessie-amd64-hvm-*"]
   }
 
