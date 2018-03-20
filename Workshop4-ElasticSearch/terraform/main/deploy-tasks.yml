@@ -1,5 +1,6 @@
 ---
-- blockinfile:
+- name: generate ssh.cfg for bastion
+  blockinfile:
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} BASTION'
@@ -11,14 +12,31 @@
         User admin
         IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
 
-- blockinfile:
+- name: generate ssh.cfg for es masters
+  blockinfile:
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
-    marker: '# {mark} NODEJS_SERVERS'
-    insertafter: "# END NODEJS_SERVERS"
+    marker: '# {mark} ES_MASTERS'
+    insertafter: "# END ES_MASTERS"
     block: |
-      {% for instance in all_terraform_outputs.nodejs_servers.value %}
-      Host nodejs-server-{{ loop.index0 }} {{ instance }}
+      {% for instance in all_terraform_outputs.es_masters.value %}
+      Host es-master-{{ loop.index0 }} {{ instance }}
+        Hostname {{ instance }}
+        StrictHostKeyChecking no
+        ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS
+        User admin
+        IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
+      {% endfor %}
+
+- name: generate ssh.cfg for es workers
+  blockinfile:
+    path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
+    create: yes
+    marker: '# {mark} ES_WORKERS'
+    insertafter: "# END ES_WORKERS"
+    block: |
+      {% for instance in all_terraform_outputs.es_workers.value %}
+      Host es-worker-{{ loop.index0 }} {{ instance }}
         Hostname {{ instance }}
         StrictHostKeyChecking no
         ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS

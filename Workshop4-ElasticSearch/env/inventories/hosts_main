@@ -1,5 +1,9 @@
 [bastion]
 BASTION_AWS
 
-[nodejs-servers]
-nodejs-server-0
+[es-masters]
+es-master-0
+
+[es-workers]
+es-worker-0
+es-worker-1

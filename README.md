@@ -64,3 +64,20 @@ ssh -F env-ssh.cfg admin@nodejs-server-0
 
 ansible-playbook plays/destroy.yml -e layer_name=main
 ```
+
+
+## Worshop4 : ElasticSearch
+
+### Commands
+```
+cd ./Workshop4-ElasticSearch
+ansible-playbook plays/build.yml -e layer_name=main
+ansible-playbook plays/apply_es_masters.yml
+ansible-playbook plays/apply_es_workers.yml
+
+ssh -F env-ssh.cfg admin@es-master-0
+curl http://localhost/_cluster/health
+# should work
+
+ansible-playbook plays/destroy.yml -e layer_name=main
+```

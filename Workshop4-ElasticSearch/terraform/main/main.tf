@@ -141,6 +141,32 @@ resource "aws_security_group" "bastion_realm" {
   }
 }
 
+resource "aws_security_group" "es_group" {
+  name_prefix = "${var.project_name}-${var.initials}-es-group"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  ingress {
+    from_port       = 9200
+    to_port         = 9200
+    protocol        = "TCP"
+    security_groups = ["${aws_security_group.bastion_ingress.id}"]
+  }
+
+  ingress {
+    from_port       = 9300
+    to_port         = 9300
+    protocol        = "TCP"
+    security_groups = ["${aws_security_group.bastion_ingress.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 # EC2
 
 resource "aws_key_pair" "bastion_keypair" {
@@ -172,27 +198,56 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
 }
 
-resource "aws_instance" "nodejs_server" {
-  count         = "${var.instance["nb"]}"
+resource "aws_instance" "es_masters" {
+  count         = "${var.instances_es_masters["nb"]}"
   ami           = "${data.aws_ami.debian.id}"
-  instance_type = "${var.instance["type"]}"
+  instance_type = "${var.instances_es_masters["type"]}"
   key_name      = "${aws_key_pair.bastion_keypair.key_name}"
 
   root_block_device = {
-    volume_size = "${var.instance["root_hdd_size"]}"
-    volume_type = "${var.instance["root_hdd_type"]}"
-  }
-
-  ebs_block_device = {
-    volume_size = "${var.instance["ebs_hdd_size"]}"
-    volume_type = "${var.instance["ebs_hdd_type"]}"
-    device_name = "${var.instance["ebs_hdd_name"]}"
+    volume_size = "${var.instances_es_masters["root_hdd_size"]}"
+    volume_type = "${var.instances_es_masters["root_hdd_type"]}"
   }
 
   subnet_id = "${aws_subnet.public_subnet.id}"
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_realm.id}",
+    "${aws_security_group.es_group.id}"
+  ]
+
+  lifecycle {
+    ignore_changes = ["ami", "instance_type", "user_data", "root_block_device", "ebs_block_device"]
+  }
+
+  tags {
+    Name = "${var.project_name}-${var.initials}-es-master-${count.index}"
+  }
+}
+
+
+resource "aws_instance" "es_workers" {
+  count         = "${var.instances_es_workers["nb"]}"
+  ami           = "${data.aws_ami.debian.id}"
+  instance_type = "${var.instances_es_workers["type"]}"
+  key_name      = "${aws_key_pair.bastion_keypair.key_name}"
+
+  root_block_device = {
+    volume_size = "${var.instances_es_workers["root_hdd_size"]}"
+    volume_type = "${var.instances_es_workers["root_hdd_type"]}"
+  }
+
+  ebs_block_device = {
+    volume_size = "${var.instances_es_workers["ebs_hdd_size"]}"
+    volume_type = "${var.instances_es_workers["ebs_hdd_type"]}"
+    device_name = "${var.instances_es_workers["ebs_hdd_name"]}"
+  }
+
+  subnet_id = "${aws_subnet.public_subnet.id}"
+
+  vpc_security_group_ids = [
+    "${aws_security_group.bastion_realm.id}",
+    "${aws_security_group.es_group.id}"
   ]
 
   user_data = "${data.template_file.user-data.rendered}"
@@ -202,6 +257,6 @@ resource "aws_instance" "nodejs_server" {
   }
 
   tags {
-    Name = "${var.project_name}-${var.initials}-nodejs-server-${count.index}"
+    Name = "${var.project_name}-${var.initials}-es-worker-${count.index}"
   }
 }

@@ -1,7 +1,12 @@
 [bastion]
 BASTION_AWS
 
-[nodejs-servers]
-{% for instance in all_terraform_outputs.nodejs_servers.value %}
-nodejs-server-{{ loop.index0 }}
+[es-masters]
+{% for instance in all_terraform_outputs.es_masters.value %}
+es-master-{{ loop.index0 }}
+{% endfor %}
+
+[es-workers]
+{% for instance in all_terraform_outputs.es_workers.value %}
+es-worker-{{ loop.index0 }}
 {% endfor %}
