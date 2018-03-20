@@ -68,7 +68,7 @@ resource "aws_eip" "nat_instance" {
 
 resource "aws_nat_gateway" "nat_instance" {
   allocation_id = "${aws_eip.nat_instance.id}"
-  subnet_id     = "${aws_subnet.private_subnet.id}"
+  subnet_id     = "${aws_subnet.public_subnet.id}"
 }
 
 resource "aws_route_table" "private_subnet_route" {
@@ -141,6 +141,50 @@ resource "aws_security_group" "bastion_realm" {
   }
 }
 
+# IAM profile
+
+resource "aws_iam_instance_profile" "instance_profile" {
+  name = "${var.project_name}-${var.initials}-instance-profile"
+  role = "${aws_iam_role.instance_role.name}"
+}
+
+resource "aws_iam_role" "instance_role" {
+  name = "${var.project_name}-${var.initials}-instance-role"
+  path = "/"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "instance_role_policy" {
+  name = "${var.project_name}-${var.initials}-instance-role-policy"
+  role = "${aws_iam_role.instance_role.id}"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ec2:Describe*",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
 # EC2
 
 resource "aws_key_pair" "bastion_keypair" {
@@ -173,10 +217,11 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_instance" "nodejs_server" {
-  count         = "${var.instance["nb"]}"
-  ami           = "${data.aws_ami.debian.id}"
-  instance_type = "${var.instance["type"]}"
-  key_name      = "${aws_key_pair.bastion_keypair.key_name}"
+  count                = "${var.instance["nb"]}"
+  ami                  = "${data.aws_ami.debian.id}"
+  instance_type        = "${var.instance["type"]}"
+  iam_instance_profile = "${aws_iam_instance_profile.instance_profile.name}"
+  key_name             = "${aws_key_pair.bastion_keypair.key_name}"
 
   root_block_device = {
     volume_size = "${var.instance["root_hdd_size"]}"
@@ -189,7 +234,7 @@ resource "aws_instance" "nodejs_server" {
     device_name = "${var.instance["ebs_hdd_name"]}"
   }
 
-  subnet_id = "${aws_subnet.public_subnet.id}"
+  subnet_id = "${aws_subnet.private_subnet.id}"
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_realm.id}",
