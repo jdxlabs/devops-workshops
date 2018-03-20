@@ -1,0 +1,13 @@
+[bastion]
+BASTION_AWS
+
+[es_instances:children]
+es-masters
+es-workers
+
+[es-masters]
+es-master-0
+
+[es-workers]
+es-worker-0
+es-worker-1

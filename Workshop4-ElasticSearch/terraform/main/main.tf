@@ -149,14 +149,14 @@ resource "aws_security_group" "es_group" {
     from_port       = 9200
     to_port         = 9200
     protocol        = "TCP"
-    security_groups = ["${aws_security_group.bastion_ingress.id}"]
+    security_groups = ["${aws_security_group.bastion_realm.id}"]
   }
 
   ingress {
     from_port       = 9300
     to_port         = 9300
     protocol        = "TCP"
-    security_groups = ["${aws_security_group.bastion_ingress.id}"]
+    security_groups = ["${aws_security_group.bastion_realm.id}"]
   }
 
   egress {
