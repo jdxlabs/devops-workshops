@@ -68,7 +68,7 @@ resource "aws_eip" "nat_instance" {
 
 resource "aws_nat_gateway" "nat_instance" {
   allocation_id = "${aws_eip.nat_instance.id}"
-  subnet_id     = "${aws_subnet.private_subnet.id}"
+  subnet_id     = "${aws_subnet.public_subnet.id}"
 }
 
 resource "aws_route_table" "private_subnet_route" {
@@ -167,6 +167,50 @@ resource "aws_security_group" "es_group" {
   }
 }
 
+# IAM profile
+
+resource "aws_iam_instance_profile" "instance_profile" {
+  name = "${var.project_name}-${var.initials}-instance-profile"
+  role = "${aws_iam_role.instance_role.name}"
+}
+
+resource "aws_iam_role" "instance_role" {
+  name = "${var.project_name}-${var.initials}-instance-role"
+  path = "/"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "instance_role_policy" {
+  name = "${var.project_name}-${var.initials}-instance-role-policy"
+  role = "${aws_iam_role.instance_role.id}"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ec2:Describe*",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
 # EC2
 
 resource "aws_key_pair" "bastion_keypair" {
@@ -199,17 +243,18 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_instance" "es_masters" {
-  count         = "${var.instances_es_masters["nb"]}"
-  ami           = "${data.aws_ami.debian.id}"
-  instance_type = "${var.instances_es_masters["type"]}"
-  key_name      = "${aws_key_pair.bastion_keypair.key_name}"
+  count                = "${var.instances_es_masters["nb"]}"
+  ami                  = "${data.aws_ami.debian.id}"
+  instance_type        = "${var.instances_es_masters["type"]}"
+  iam_instance_profile = "${aws_iam_instance_profile.instance_profile.name}"
+  key_name             = "${aws_key_pair.bastion_keypair.key_name}"
 
   root_block_device = {
     volume_size = "${var.instances_es_masters["root_hdd_size"]}"
     volume_type = "${var.instances_es_masters["root_hdd_type"]}"
   }
 
-  subnet_id = "${aws_subnet.public_subnet.id}"
+  subnet_id = "${aws_subnet.private_subnet.id}"
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_realm.id}",
@@ -227,10 +272,11 @@ resource "aws_instance" "es_masters" {
 
 
 resource "aws_instance" "es_workers" {
-  count         = "${var.instances_es_workers["nb"]}"
-  ami           = "${data.aws_ami.debian.id}"
-  instance_type = "${var.instances_es_workers["type"]}"
-  key_name      = "${aws_key_pair.bastion_keypair.key_name}"
+  count                = "${var.instances_es_workers["nb"]}"
+  ami                  = "${data.aws_ami.debian.id}"
+  instance_type        = "${var.instances_es_workers["type"]}"
+  iam_instance_profile = "${aws_iam_instance_profile.instance_profile.name}"
+  key_name             = "${aws_key_pair.bastion_keypair.key_name}"
 
   root_block_device = {
     volume_size = "${var.instances_es_workers["root_hdd_size"]}"
@@ -243,7 +289,7 @@ resource "aws_instance" "es_workers" {
     device_name = "${var.instances_es_workers["ebs_hdd_name"]}"
   }
 
-  subnet_id = "${aws_subnet.public_subnet.id}"
+  subnet_id = "${aws_subnet.private_subnet.id}"
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_realm.id}",
