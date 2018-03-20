@@ -1,0 +1,91 @@
+---
+- name: install 'unzip' command
+  package:
+    name: "unzip"
+    state: latest
+
+- name: create cache directory for download
+  file:
+    path: "{{ consul_cache_dir }}"
+    state: directory
+    mode: 0750
+
+- name: download consul archive
+  get_url:
+    url: "{{ consul_archive_url }}"
+    dest: "{{ consul_archive_dest }}"
+    checksum: "sha256:{{ consul_archive_sum }}"
+
+- name: unarchive consul
+  unarchive:
+    src: "{{ consul_archive_dest }}"
+    dest: "/usr/local/bin"
+    creates: "/usr/local/bin/consul"
+    remote_src: yes
+
+- name: create system group
+  group:
+    name: "{{ consul_user_name }}"
+    gid: "{{ consul_user_id }}"
+    system: yes
+
+- name: create system user
+  user:
+    name: "{{ consul_user_name }}"
+    group: "{{ consul_user_name }}"
+    uid: "{{ consul_user_id }}"
+    createhome: no
+    system: yes
+
+- name: create data directory
+  file:
+    path: "{{ consul_data_dir }}"
+    state: directory
+    mode: 0750
+    owner: "{{ consul_user_name }}"
+    group: "{{ consul_user_name }}"
+
+- name: create configuration directory
+  file:
+    path: "{{ consul_config_dir }}"
+    state: directory
+    mode: 0750
+    group: "{{ consul_user_name }}"
+
+- name: generate configuration
+  template:
+    src: "config.json.j2"
+    dest: "{{ consul_config_dir }}/config.json"
+    group: "{{ consul_user_name }}"
+    mode: 0640
+  notify: restart consul
+
+- name: generate default variables
+  template:
+    src: "env.{{ consul_mode }}.j2"
+    dest: "/etc/default/consul"
+    group: "{{ consul_user_name }}"
+    mode: 0640
+  notify: restart consul
+
+- name: generate rsyslog configuration
+  copy:
+    dest: "/etc/rsyslog.d/consul.conf"
+    mode: 0644
+    content: >-
+      :programname, isequal, "consul" {{ consul_log_dest }}
+      & stop
+  notify: restart rsyslog
+
+- name: generate systemd service
+  template:
+    src: "consul.service.{{ consul_mode }}.j2"
+    dest: "/etc/systemd/system/consul.service"
+    mode: 0640
+  notify: restart consul
+
+- name: at last consul is made available
+  service:
+    name: "{{ consul_user_name }}"
+    state: started
+    enabled: yes

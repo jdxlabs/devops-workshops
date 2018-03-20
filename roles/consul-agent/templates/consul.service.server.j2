@@ -1,0 +1,16 @@
+[Unit]
+Description=Consul agent
+Requires=network.target
+After=network.target
+
+[Service]
+User={{ consul_user_name }}
+EnvironmentFile=/etc/default/consul
+Restart=on-failure
+Type=simple
+ExecStart=/usr/local/bin/consul agent -node={{ inventory_hostname }} -ui $CONSUL_CONF_DIR $CONSUL_BIND $CONSUL_EXPECT $CONSUL_DATA_DIR
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

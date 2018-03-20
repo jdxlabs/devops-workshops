@@ -1,0 +1,26 @@
+---
+consul_cache_dir: "/var/cache/run"
+
+consul_version: "0.9.2"
+consul_archive_sum: "0a2921fc7ca7e4702ef659996476310879e50aeeecb5a205adfdbe7bd8524013"
+
+consul_url_prefix: "https://releases.hashicorp.com/consul/{{ consul_version }}"
+consul_archive_name: "consul_{{ consul_version }}_linux_amd64.zip"
+consul_archive_dest: "{{ consul_cache_dir }}/{{ consul_archive_name }}"
+consul_archive_url: "{{ consul_url_prefix }}/{{ consul_archive_name }}"
+
+consul_data_dir: "/var/lib/consul"
+consul_config_dir: "/etc/consul.d"
+
+consul_dc_name: "dc1"
+
+consul_user_name: "consul"
+consul_user_id: "801"
+
+consul_network_interface: eth0
+
+consul_mode: "node"
+
+consul_masters_group_name: "consul-servers-bootstrap"
+
+consul_log_dest: "/var/log/consul.log"

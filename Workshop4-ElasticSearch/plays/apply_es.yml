@@ -1,6 +1,8 @@
 ---
 - hosts: "es_instances"
   become: yes
+  vars_files:
+    - "{{ playbook_dir }}../../envvars.yml"
   pre_tasks:
     - debug:
         msg: "{{ hostvars[groups['es_instances'][0]].ansible_default_ipv4.address }}:9300"
@@ -9,6 +11,7 @@
         update_cache: yes
     - set_fact:
         cluster_alias: "es"
+        target_name: "{{ target_name }}-{{ initials }}"
   roles:
     - role: es-role
       vars:
@@ -19,7 +22,7 @@
           node.data: "{{ es_node_data }}"
           node.master: "{{ es_node_master }}"
           node.ingest: "{{ es_node_ingest }}"
-          discovery.zen.ping.unicast.hosts: "{{ hostvars[groups['es_instances_masters'][0]].ansible_default_ipv4.address }}:9300"
+          discovery.zen.ping.unicast.hosts: "{{ hostvars[groups['es-masters'][0]].ansible_default_ipv4.address }}:9300"
           network.host: "{{ ansible_default_ipv4.address }}"
           transport.tcp.port: 9300
         es_api_host: "{{ ansible_default_ipv4.address }}"

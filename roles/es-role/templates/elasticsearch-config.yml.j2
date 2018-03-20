@@ -33,7 +33,7 @@ path.conf: {{ es_conf_dir }}
 path.data: {{ es_data_dir }}
 path.logs: {{ es_log_dir }}
 
-repositories:
-    s3:
-        bucket: "{{ target_name }}-{{ target_region }}-{{ cluster_alias }}-snapshots"
-        region: "{{ target_region }}"
+# repositories:
+#     s3:
+#         bucket: "{{ target_name }}-{{ target_region }}-{{ cluster_alias }}-snapshots"
+#         region: "{{ target_region }}"
