@@ -1,8 +1,8 @@
 # devops-workshops
-Worshops around the devops methodology
+Workshops around the devops methodology
 
 
-## Worshop1 : Terraform
+## Workshop1 : Terraform
 
 ### Terraform installation
 * Get it here : https://www.terraform.io/downloads.html
@@ -27,7 +27,7 @@ terraform destroy -var-file=env.tfvars
 ```
 
 
-## Worshop2 : Ansible-Terraform
+## Workshop2 : Ansible-Terraform
 
 ### Commands
 ```
@@ -52,7 +52,7 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Worshop3 : Bastion
+## Workshop3 : Bastion
 
 ### Commands
 ```
@@ -66,7 +66,7 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Worshop4 : ElasticSearch
+## Workshop4 : ElasticSearch
 
 ### Commands
 ```
@@ -98,7 +98,7 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Worshop5 : Consul
+## Workshop5 : Consul
 
 ### Commands
 ```
@@ -115,7 +115,7 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Worshop6 : Prometheus
+## Workshop6 : Prometheus
 
 ### Commands
 ```
