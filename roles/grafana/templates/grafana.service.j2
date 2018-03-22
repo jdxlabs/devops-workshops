@@ -1,0 +1,14 @@
+[Unit]
+Description=Grafana
+After=syslog.target network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ grafana_deploy_dir }}
+ExecStart={{ grafana_deploy_dir }}/bin/grafana-server
+User={{ grafana_user }}
+Group={{ grafana_user }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

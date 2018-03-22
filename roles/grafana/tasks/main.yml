@@ -1,0 +1,60 @@
+---
+- group:
+    name: "{{ grafana_user }}"
+    system: yes
+
+- user:
+    name: "{{ grafana_user }}"
+    group: "{{ grafana_user }}"
+    home: "{{ grafana_deploy_dir }}"
+    createhome: no
+
+- get_url:
+    url: "{{ grafana_archive_url }}"
+    dest: "{{ ansible_cache_dir }}/{{ grafana_archive_name }}"
+    sha256sum: "{{ grafana_archive_sum[grafana_version] }}"
+
+- unarchive:
+    src: "{{ ansible_cache_dir }}/{{ grafana_archive_name }}"
+    dest: "{{ grafana_unarchive_dir }}/"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_user }}"
+    copy: no
+    creates: "{{ grafana_unarchive_creates }}"
+
+- name: enforcing ownership on {{ grafana_unarchive_dir }}/grafana-{{ grafana_version }}
+  file:
+    path: "{{ grafana_unarchive_dir }}/grafana-{{ grafana_version }}"
+    state: directory
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_user }}"
+    recurse: yes
+
+- file:
+    src: "{{ grafana_unarchive_dir }}/grafana-{{ grafana_version }}"
+    state: link
+    dest: "{{ grafana_deploy_dir }}"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_user }}"
+
+- name: Set custom parameters
+  template:
+    src: "custom.ini.j2"
+    dest: "{{ grafana_conf_dir }}/custom.ini"
+  notify: restart grafana
+
+- template:
+    src: "grafana.service.j2"
+    dest: "/lib/systemd/system/grafana.service"
+  register: grafana_service
+
+- shell: >
+    systemctl daemon-reload
+  when: grafana_service|changed
+  notify: restart grafana
+
+- service:
+    name: grafana
+    state: started
+    enabled: yes
+

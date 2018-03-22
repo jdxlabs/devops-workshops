@@ -1,0 +1,12 @@
+---
+- name: restart node_exporter
+  service:
+    name: node_exporter
+    state: restarted
+    enabled: yes
+
+- name: restart consul
+  service:
+    name: consul
+    state: restarted
+    enabled: yes

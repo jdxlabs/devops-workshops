@@ -1,0 +1,14 @@
+[Unit]
+Description=Prometheus Node Exporter
+After=syslog.target network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ node_exporter_deploy_dir }}
+ExecStart={{ node_exporter_deploy_dir }}/node_exporter --collector.textfile.directory={{ node_exporter_deploy_dir }}/txt
+User={{ node_exporter_user }}
+Group={{ node_exporter_user }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

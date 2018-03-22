@@ -1,0 +1,17 @@
+---
+- name: restart prometheus
+  service:
+    name: prometheus
+    state: restarted
+    enabled: yes
+
+- name: restart consul
+  service:
+    name: consul
+    state: restarted
+    enabled: yes
+
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted

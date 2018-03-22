@@ -1,0 +1,8 @@
+---
+- hosts: monitor
+  become: yes
+  tags:
+    - prometheus
+  roles:
+    - prometheus-master-2.x
+    - grafana

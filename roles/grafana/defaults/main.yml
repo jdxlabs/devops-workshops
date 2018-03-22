@@ -1,0 +1,3 @@
+---
+ansible_cache_dir: "/tmp"
+grafana_version: "4.3.2"

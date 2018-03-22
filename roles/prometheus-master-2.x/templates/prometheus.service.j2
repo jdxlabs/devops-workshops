@@ -1,0 +1,13 @@
+[Unit]
+Description=Prometheus Monitoring Master
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart={{ prometheus_deploy_dir }}/prometheus --config.file={{ prometheus_deploy_dir }}/prometheus.yml --storage.tsdb.path={{ prometheus_deploy_dir }}/data --storage.tsdb.retention={{ prometheus_storage_retention }}
+User={{ prometheus_user }}
+Group={{ prometheus_user }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

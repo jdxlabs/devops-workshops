@@ -7,5 +7,8 @@ consul-masters
 [consul-masters]
 consul-master-0
 
-[consul-clients]
-consul-client-0
+[monitor]
+monitor-0
+
+[nodejs-servers]
+nodejs-server-0

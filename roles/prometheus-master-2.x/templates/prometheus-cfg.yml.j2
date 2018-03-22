@@ -1,0 +1,29 @@
+---
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+  external_labels:
+    monitor: 'prometheus-master'
+
+scrape_configs:
+  - job_name: node_exporters
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    relabel_configs:
+
+      - source_labels: [__meta_consul_tags]
+        regex: .*,monitor-node,.*
+        action: keep
+
+      - source_labels: [__meta_consul_service]
+        target_label: job
+
+      - source_labels: [__meta_consul_node]
+        target_label: node
+
+      - source_labels: [__meta_consul_node]
+        target_label: inventory_hostname
+
+      - source_labels: [__meta_consul_tags]
+        target_label: consul_tags

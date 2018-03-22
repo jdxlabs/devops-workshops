@@ -1,0 +1,14 @@
+{
+  "service": {
+    "name": "traefik/prometheus",
+    "tags": [
+        "traefik.frontend.entrypoints=http",
+        "traefik.frontend.backend=prometheus",
+        "traefik.frontend.passHostHeader=true",
+        "traefik.frontend.rule=Host:prometheus.{{ dns_internal_domain }}",
+        "traefik.backends.prometheus.servers.monitor.url=http://{{ ansible_default_ipv4.address }}:9090/",
+        "traefik.tags=internal"
+    ],
+    "port": 9090
+  }
+}

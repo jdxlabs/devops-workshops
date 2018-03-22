@@ -1,0 +1,12 @@
+---
+ansible_cache_dir: "/tmp"
+prometheus_unarchive_dir: "/opt"
+
+prometheus_version: "2.1.0"
+
+# fine tuning parameters
+prometheus_storage_retention: "120h"
+prom_nomad_cfg_scrape_interval: "30s"
+prom_nomad_cfg_evaluation_interval: "30s"
+
+prometheus_log_dest: "{{ graylog_udp_destination }}"

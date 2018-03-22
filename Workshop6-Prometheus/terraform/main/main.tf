@@ -166,6 +166,13 @@ resource "aws_security_group" "consul_group" {
     security_groups = ["${aws_security_group.bastion_realm.id}"]
   }
 
+  ingress {
+    from_port = 9100
+    to_port = 9110
+    protocol = "TCP"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -341,6 +348,6 @@ resource "aws_instance" "nodejs_servers" {
   }
 
   tags {
-    Name = "${var.project_name}-${var.initials}-monitor-${count.index}"
+    Name = "${var.project_name}-${var.initials}-nodejs-server-${count.index}"
   }
 }
