@@ -3,7 +3,6 @@
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} NODEJS_SERVERS'
-    insertafter: "# END NODEJS_SERVERS"
     block: |
       {% for instance in all_terraform_outputs.nodejs_servers.value %}
       Host nodejs-server-{{ loop.index0 }} {{ instance }}

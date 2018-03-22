@@ -1,0 +1,40 @@
+---
+- hosts: "{{ target|default('nodejs-servers') }}"
+  become: yes
+  gather_facts: no
+
+  vars:
+    app_dir: "/var/www/app"
+    app_port: 80
+
+  tasks:
+    - name: Install PM2
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        force: yes
+
+    - name: Create server file
+      copy:
+        dest: "{{ app_dir }}/server.js"
+        mode: "0640"
+        content: |-
+          const http = require('http');
+
+          const server = http.createServer(function(req, res) {
+            res.end('hey !!');
+          });
+
+          server.listen({{ app_port }});
+
+    - name: Launch daemon with pm2
+      shell: >-
+        pm2 start server.js
+      args:
+        chdir: "{{ app_dir }}"
+      changed_when: false

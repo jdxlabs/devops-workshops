@@ -1,0 +1,11 @@
+[bastion]
+BASTION_AWS
+
+[consul-servers-bootstrap:children]
+consul-masters
+
+[consul-masters]
+consul-master-0
+
+[consul-clients]
+consul-client-0

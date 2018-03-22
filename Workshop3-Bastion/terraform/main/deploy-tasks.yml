@@ -3,7 +3,6 @@
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} BASTION'
-    insertafter: "# END BASTION"
     block: |
       Host BASTION_AWS
         Hostname {{ all_terraform_outputs.bastion.value }}
@@ -15,7 +14,7 @@
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} NODEJS_SERVERS'
-    insertafter: "# END NODEJS_SERVERS"
+    insertafter: "# END BASTION"
     block: |
       {% for instance in all_terraform_outputs.nodejs_servers.value %}
       Host nodejs-server-{{ loop.index0 }} {{ instance }}

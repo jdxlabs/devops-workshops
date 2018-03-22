@@ -4,7 +4,6 @@
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} BASTION'
-    insertafter: "# END BASTION"
     block: |
       Host BASTION_AWS
         Hostname {{ all_terraform_outputs.bastion.value }}
@@ -17,7 +16,7 @@
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} ES_MASTERS'
-    insertafter: "# END ES_MASTERS"
+    insertafter: "# END BASTION"
     block: |
       {% for instance in all_terraform_outputs.es_masters.value %}
       Host es-master-{{ loop.index0 }} {{ instance }}
@@ -33,7 +32,7 @@
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} ES_WORKERS'
-    insertafter: "# END ES_WORKERS"
+    insertafter: "# END ES_MASTERS"
     block: |
       {% for instance in all_terraform_outputs.es_workers.value %}
       Host es-worker-{{ loop.index0 }} {{ instance }}

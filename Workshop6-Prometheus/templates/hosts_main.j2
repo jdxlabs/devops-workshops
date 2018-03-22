@@ -1,0 +1,20 @@
+[bastion]
+BASTION_AWS
+
+[consul-servers-bootstrap:children]
+consul-masters
+
+[consul-masters]
+{% for instance in all_terraform_outputs.consul_masters.value %}
+consul-master-{{ loop.index0 }}
+{% endfor %}
+
+[monitor]
+{% for instance in all_terraform_outputs.monitor_instances.value %}
+monitor-{{ loop.index0 }}
+{% endfor %}
+
+[nodejs-servers]
+{% for instance in all_terraform_outputs.nodejs_servers.value %}
+nodejs-server-{{ loop.index0 }}
+{% endfor %}
