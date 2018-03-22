@@ -137,6 +137,8 @@ pm2 ls
 
 ansible-playbook plays/apply_monitor_exporters.yml
 ansible-playbook plays/apply_monitor.yml
+ssh -F env-ssh.cfg admin@monitor-0 -L 3000:localhost:3000 -L 9090:localhost:9090
+# import this dashboard : https://grafana.com/dashboards/1860
 
 ansible-playbook plays/destroy.yml -e layer_name=main
 ```

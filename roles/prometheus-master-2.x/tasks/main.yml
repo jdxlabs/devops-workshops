@@ -48,16 +48,6 @@
   notify: restart prometheus
   tags: update-conf
 
-- name: generate rsyslog configuration
-  copy:
-    dest: "/etc/rsyslog.d/prometheus.conf"
-    mode: "0644"
-    content: |-
-      :programname, contains, "prometheus" {{ prometheus_log_dest }}
-      & stop
-  notify: restart rsyslog
-  tags: update-rsyslog
-
 - service:
     name: prometheus
     state: started
