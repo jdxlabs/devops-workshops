@@ -1,3 +1,10 @@
 ---
 ansible_cache_dir: "/tmp"
 grafana_version: "4.3.2"
+
+grafana_smtp_enabled: "false"
+grafana_smtp_from_email: ""
+grafana_smtp_from_name: ""
+grafana_smtp_host: ""
+grafana_smtp_user: ""
+grafana_smtp_pass: ""

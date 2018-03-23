@@ -14,9 +14,3 @@ grafana_archive_sum:
 grafana_user: "grafana"
 
 grafana_conf_dir: "{{ grafana_deploy_dir }}/conf"
-grafana_smtp_enabled: "true"
-grafana_smtp_from_email: "grafana@jin.fr"
-grafana_smtp_from_name: "Grafana"
-grafana_smtp_host: "smtp.mandrillapp.com:587"
-grafana_smtp_user: "rb@jin.fr"
-grafana_smtp_pass: "whWvl_v7xGBa8V4GKZuhGg"

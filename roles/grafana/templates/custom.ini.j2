@@ -1,3 +1,5 @@
+
+{% if grafana_smtp_enabled == "true" %}
 [smtp]
 enabled = {{ grafana_smtp_enabled }}
 from_address = {{ grafana_smtp_from_email }}
@@ -5,3 +7,4 @@ from_name = {{ grafana_smtp_from_name }}
 host = {{ grafana_smtp_host }}
 user = {{ grafana_smtp_user }}
 password = {{ grafana_smtp_pass }}
+{% endif %}
