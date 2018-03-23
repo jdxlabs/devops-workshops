@@ -160,7 +160,7 @@ resource "aws_security_group" "consul_group" {
   }
 
   ingress {
-    from_port       = 8300
+    from_port       = 8600
     to_port         = 8600
     protocol        = "TCP"
     security_groups = ["${aws_security_group.bastion_realm.id}"]
