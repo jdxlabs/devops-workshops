@@ -2,7 +2,7 @@
 Workshops around the devops methodology
 
 
-## Workshop1 : Terraform
+## Workshop01 : Terraform
 
 ### Terraform installation
 * Get it here : https://www.terraform.io/downloads.html
@@ -11,7 +11,7 @@ Workshops around the devops methodology
 
 ### Commands
 ```
-cd ./Workshop1-Terraform
+cd ./Workshop01-Terraform
 aws configure --profile sandbox-admin
 # be sure to be connected to the AWS accout you want
 
@@ -27,11 +27,11 @@ terraform destroy -var-file=env.tfvars
 ```
 
 
-## Workshop2 : Ansible-Terraform
+## Workshop02 : Ansible-Terraform
 
 ### Commands
 ```
-cd ./Workshop2-Ansible-Terraform
+cd ./Workshop02-Ansible-Terraform
 ansible-playbook plays/build.yml -e layer_name=main
 
 ansible -m ping all
@@ -52,11 +52,11 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Workshop3 : Bastion
+## Workshop03 : Bastion
 
 ### Commands
 ```
-cd ./Workshop3-Bastion
+cd ./Workshop03-Bastion
 ansible-playbook plays/build.yml -e layer_name=main
 
 ssh -F env-ssh.cfg admin@nodejs-server-0
@@ -66,11 +66,11 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Workshop4 : ElasticSearch
+## Workshop04 : ElasticSearch
 
 ### Commands
 ```
-cd ./Workshop4-ElasticSearch
+cd ./Workshop04-ElasticSearch
 ansible-playbook plays/build.yml -e layer_name=main
 ansible-playbook plays/apply_es.yml
 
@@ -98,11 +98,11 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Workshop5 : Consul
+## Workshop05 : Consul
 
 ### Commands
 ```
-cd ./Workshop5-Consul
+cd ./Workshop05-Consul
 ansible-playbook plays/build.yml -e layer_name=main
 ansible-playbook plays/apply_consul.yml
 
@@ -115,11 +115,11 @@ ansible-playbook plays/destroy.yml -e layer_name=main
 ```
 
 
-## Workshop6 : Prometheus
+## Workshop06 : Prometheus
 
 ### Commands
 ```
-cd ./Workshop6-Prometheus
+cd ./Workshop06-Prometheus
 ansible-playbook plays/build.yml -e layer_name=main
 
 ansible-playbook plays/apply_basics.yml
@@ -141,4 +141,39 @@ ssh -F env-ssh.cfg admin@monitor-0 -L 3000:localhost:3000 -L 9090:localhost:9090
 # import this dashboard : https://grafana.com/dashboards/1860
 
 ansible-playbook plays/destroy.yml -e layer_name=main
+```
+
+## Workshop07 : Docker
+
+### Instructions
+* Install Docker [following the procedure for your machine](https://grafana.com/dashboards/1860)
+* At the end, you can add the Nomad orchestrator [following this tutorial](https://github.com/jdxlabs/hello-nomad)
+* You have cheatsheets available for [Docker](https://jdxlabs.com/notes/docker) and for [Nomad](https://jdxlabs.com/notes/nomad)
+
+### Commands
+```
+cd ./Workshop07-Docker
+
+# to build the docker image
+docker build -t hello-docker -f node-app/Dockerfile node-app/.
+
+# to run your container locally
+docker run -d -p 8080:8080 --name hello-docker hello-docker
+
+# to see informations about the container
+docker ps -a
+docker stats
+
+# to have a shell access for your container
+docker exec -it hello-docker sh
+
+# to stop the container and remove the image
+docker stop -t0 hello-docker
+docker rm hello-docker
+```
+
+## Workshop08 : Nomad
+
+```
+TODO
 ```
