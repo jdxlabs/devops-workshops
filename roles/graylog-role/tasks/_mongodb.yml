@@ -1,0 +1,39 @@
+---
+
+- name: MongoDB should be installed
+  apt:
+    name: "mongodb-server"
+    state: present
+    update_cache: yes
+
+- name: Creates MongoDB data path
+  file:
+    path: "{{ graylog_mongodb_data_path }}"
+    state: directory
+    owner: mongodb
+    group: mongodb
+    mode: 0755
+
+- name: MongoDB service file should be installed
+  template:
+    src: 'mongodb.service.j2'
+    dest: "/lib/systemd/system/mongodb.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload systemd configuration
+    - restart mongodb
+
+- name: MongoDB should be configured
+  template:
+    src: 'mongodb.conf.j2'
+    dest: "/etc/mongodb.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart mongodb
+
+- meta: flush_handlers
+- name: Wait for MongoDB to startup
+  wait_for: host=127.0.0.1 port=27017 delay=5 connect_timeout=1

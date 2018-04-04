@@ -1,0 +1,35 @@
+{% set comma = joiner(",") %}
+
+bind_addr = "0.0.0.0"
+
+data_dir  = "{{ nomad_worker_data_dir }}"
+
+datacenter = "{{ nomad_worker_dc_name }}"
+
+advertise {
+  http = "{{ ansible_default_ipv4.address }}"
+  rpc  = "{{ ansible_default_ipv4.address }}"
+  serf = "{{ ansible_default_ipv4.address }}"
+}
+
+client {
+  enabled = true
+
+  options {
+    "docker.auth.helper" = "ecr"
+  }
+
+  gc_interval = "1m"
+  gc_disk_usage_threshold = 10
+  gc_inode_usage_threshold = 10
+  gc_max_allocs = 10
+  gc_parallel_destroys = 4
+
+  reserved {
+    cpu = {{ nomad_client_reserved_cpu }}
+  }
+}
+
+consul {
+  address = "localhost:8500"
+}

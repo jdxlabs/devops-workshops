@@ -1,0 +1,27 @@
+{% set comma = joiner(",") %}
+
+bind_addr = "0.0.0.0"
+
+data_dir  = "{{ nomad_server_data_dir }}"
+
+datacenter = "{{ nomad_server_dc_name }}"
+
+advertise {
+  http = "{{ ansible_default_ipv4.address }}"
+  rpc  = "{{ ansible_default_ipv4.address }}"
+  serf = "{{ ansible_default_ipv4.address }}"
+}
+
+server {
+  enabled          = true
+  bootstrap_expect = {{ groups['nomad-servers-bootstrap']|length }}
+  start_join       = [
+  {%- for host in groups['nomad-servers-bootstrap'] -%}
+  {{ comma() }}"{{ hostvars[host]['ansible_'+nomad_server_network_interface]['ipv4']['address'] }}"
+  {%- endfor -%}
+  ]
+}
+
+consul {
+  address = "localhost:8500"
+}

@@ -1,0 +1,15 @@
+---
+- assert:
+    that:
+      - graylog_admin_password is defined
+      - graylog_server_salt is defined
+    msg: >-
+      'graylog_server_salt' and 'graylog_admin_password' variables must be defined.
+
+- include: "_mongodb.yml"
+
+- include: "_java.yml"
+
+- include: "_elasticsearch.yml"
+
+- include: "_graylog.yml"

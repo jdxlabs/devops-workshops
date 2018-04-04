@@ -1,0 +1,92 @@
+---
+- name: install 'unzip' command
+  package:
+    name: "unzip"
+    state: latest
+
+- name: create cache directory for download
+  file:
+    path: "{{ nomad_server_cache_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: download nomad archive
+  get_url:
+    url: "{{ nomad_server_archive_url }}"
+    dest: "{{ nomad_server_archive_dest }}"
+    checksum: "sha256:{{ nomad_server_archive_sum }}"
+
+- name: unarchive nomad
+  unarchive:
+    src: "{{ nomad_server_archive_dest }}"
+    dest: "/usr/local/bin"
+    remote_src: yes
+
+- name: create system group
+  group:
+    name: "{{ nomad_server_user_name }}"
+    gid: "{{ nomad_server_user_id }}"
+    system: yes
+
+- name: create system user
+  user:
+    name: "{{ nomad_server_user_name }}"
+    group: "{{ nomad_server_user_name }}"
+    uid: "{{ nomad_server_user_id }}"
+    createhome: no
+    system: yes
+
+- name: create data directory
+  file:
+    path: "{{ nomad_server_data_dir }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ nomad_server_user_name }}"
+    group: "{{ nomad_server_user_name }}"
+
+- name: create configuration directory
+  file:
+    path: "{{ nomad_server_config_dir }}"
+    state: directory
+    mode: "0750"
+    group: "{{ nomad_server_user_name }}"
+
+- name: generate configuration
+  template:
+    src: "config.hcl.j2"
+    dest: "{{ nomad_server_config_dir }}/config.hcl"
+    group: "{{ nomad_server_user_name }}"
+    mode: "0640"
+  notify: restart nomad
+  tags: update-conf
+
+- name: generate rsyslog configuration
+  copy:
+    dest: "/etc/rsyslog.d/nomad.conf"
+    mode: "0644"
+    content: |-
+      :programname, contains, "nomad" {{ nomad_server_log_dest }}
+      & stop
+  notify: restart rsyslog
+  tags: update-rsyslog
+
+- name: create nomad environment file
+  template:
+    src: "{{ playbook_dir }}/../../templates/default_nomad.j2"
+    dest: "/etc/default/nomad"
+  tags: update-conf
+
+- name: generate systemd service
+  template:
+    src: "nomad.service.j2"
+    dest: "/etc/systemd/system/nomad.service"
+    mode: "0640"
+  notify: restart nomad
+  tags: update-conf
+
+- name: at last nomad is made available
+  service:
+    name: "{{ nomad_server_user_name }}"
+    state: started
+    enabled: yes
+  tags: update-conf

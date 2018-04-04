@@ -1,0 +1,53 @@
+---
+- name: Add elasticsearch project repository key
+  apt_key:
+    url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+    state: present
+
+- name: Add elasticsearch project repository
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/{{ graylog_es_version }}/apt stable main"
+    filename: "elastic-{{ graylog_es_version }}"
+    update_cache: yes
+
+- apt:
+    name: "elasticsearch"
+    state: present
+    update_cache: yes
+
+- name: Creates elasticsearch data path
+  file:
+    path: "{{ graylog_elasticsearch_data_path }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    mode: 0750
+
+- name: Render Systemd File for Instance
+  template:
+    src: "elasticsearch.service.j2"
+    dest: "/usr/lib/systemd/system/elasticsearch.service"
+    mode: "0644"
+    force: yes
+  notify:
+    - reload systemd configuration
+    - restart elasticsearch
+
+- name: Render Configuration File
+  template:
+    src: "elasticsearch-config.yml.j2"
+    dest: "/etc/elasticsearch/elasticsearch.yml"
+    owner: "root"
+    group: "elasticsearch"
+    mode: "0644"
+    force: yes
+  notify: restart elasticsearch
+
+- name: Hold elasticsearch version
+  command: apt-mark hold elasticsearch
+
+- name: Enable elasticsearch service
+  systemd:
+    name: "elasticsearch"
+    state: started
+    enabled: yes

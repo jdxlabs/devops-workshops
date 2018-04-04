@@ -1,0 +1,20 @@
+---
+- name: add apt key
+  apt_key:
+    url: "https://download.docker.com/linux/debian/gpg"
+
+- name: add apt repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
+    update_cache: yes
+
+- name: install docker daemon
+  apt:
+    name: "docker-ce={{ docker_version }}"
+
+- name: generate systemd service
+  template:
+    src: "docker.service.j2"
+    dest: "/lib/systemd/system/docker.service"
+    mode: "0640"
+  notify: restart docker

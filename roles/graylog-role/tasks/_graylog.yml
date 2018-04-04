@@ -1,0 +1,65 @@
+---
+- name: Graylog repository package should be downloaded
+  get_url:
+    url: "{{ graylog_apt_deb_url }}"
+    dest: '/tmp/graylog_repository.deb'
+
+- name: 'Package "apt-transport-https" should be installed'
+  apt:
+    name: 'apt-transport-https'
+    state: installed
+
+- name: Graylog repository package should be installed
+  apt:
+    deb: '/tmp/graylog_repository.deb'
+    state: installed
+    dpkg_options: 'force-all'
+  register: install_repo
+
+- name: APT cache should be updated
+  apt:
+    update_cache: True
+
+- name: Graylog server package should be installed
+  apt:
+    name: "graylog-server"
+    state: present
+  notify: restart graylog-server
+
+- name: Directory should be created with correct ownership and privileges
+  file:
+    path: '/etc/graylog/server'
+    owner: graylog
+    group: graylog
+    mode: '0750'
+
+- name: Graylog server should be configured
+  template:
+    src: 'graylog.server.conf.j2'
+    dest: '/etc/graylog/server/server.conf'
+    owner: graylog
+    group: graylog
+    mode: '0644'
+  notify: restart graylog-server
+
+- name: Graylog server defaults should be configured
+  template:
+    src: 'graylog.server.default.j2'
+    dest: "{{ graylog_server_defaults_file_path }}"
+    owner: graylog
+    group: graylog
+    mode: '0644'
+  notify: restart graylog-server
+
+- name: Graylog server should start after reboot
+  file:
+    path: '/etc/init/graylog-server.override'
+    state: absent
+
+- name: Declare Graylog to Consul
+  template:
+    src: "graylog.consul-service.json.j2"
+    dest: "/etc/consul.d/graylog.consul-service.json"
+  notify: restart consul
+
+- meta: flush_handlers

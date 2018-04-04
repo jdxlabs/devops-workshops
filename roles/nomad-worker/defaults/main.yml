@@ -1,0 +1,25 @@
+---
+nomad_worker_cache_dir: "/var/cache/run"
+
+nomad_worker_version: "0.7.1"
+nomad_worker_archive_sum: "72b32799c2128ed9d2bb6cbf00c7600644a8d06c521a320e42d5493a5d8a789a"
+
+nomad_worker_url_prefix: "https://releases.hashicorp.com/nomad/{{ nomad_worker_version }}"
+nomad_worker_archive_name: "nomad_{{ nomad_worker_version }}_linux_amd64.zip"
+nomad_worker_archive_dest: "{{ nomad_worker_cache_dir }}/{{ nomad_worker_archive_name }}"
+nomad_worker_archive_url: "{{ nomad_worker_url_prefix }}/{{ nomad_worker_archive_name }}"
+nomad_worker_config_dir: "/etc/nomad.d"
+
+nomad_worker_dc_name: "dc1"
+nomad_worker_user_name: "nomad"
+nomad_worker_user_id: "802"
+nomad_worker_network_interface: eth0
+
+nomad_worker_data_dir: "/mnt/data/nomad"
+
+nomad_worker_log_dest: "/var/log/nomad.log"
+
+# in mhz, the cpu capacity reserved for each node
+#   total_cpu = cat /proc/cpuinfo | grep MHz
+#   x = (percentage_reserved * total_cpu) / 100
+nomad_client_reserved_cpu: 1000

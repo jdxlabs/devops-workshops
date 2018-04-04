@@ -1,0 +1,116 @@
+---
+- name: install 'unzip' command
+  package:
+    name: "unzip"
+    state: latest
+
+- name: create cache directory for download
+  file:
+    path: "{{ vault_cache_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: download vault archive
+  get_url:
+    url: "{{ vault_archive_url }}"
+    dest: "{{ vault_archive_dest }}"
+    checksum: "sha256:{{ vault_archive_sum }}"
+
+- name: unarchive vault
+  unarchive:
+    src: "{{ vault_archive_dest }}"
+    dest: "/usr/local/bin"
+    creates: "/usr/local/bin/vault"
+    remote_src: yes
+
+- name: create system group
+  group:
+    name: "{{ vault_user_name }}"
+    gid: "{{ vault_user_id }}"
+    system: yes
+
+- name: create system user
+  user:
+    name: "{{ vault_user_name }}"
+    group: "{{ vault_user_name }}"
+    groups:
+      - consul
+    uid: "{{ vault_user_id }}"
+    createhome: no
+    system: yes
+
+- name: remove current swaps from fstab
+  lineinfile:
+    dest: /etc/fstab
+    regexp: '^.* swap .*$'
+    state: absent
+  register: vault_swap_rm
+
+- name: disable swap now
+  shell: >-
+    swapoff --all
+  when: vault_swap_rm|changed
+
+- name: generate configuration
+  template:
+    src: "config.json.j2"
+    dest: "{{ vault_config_file }}"
+    group: "{{ vault_user_name }}"
+    mode: "0640"
+  notify: restart vault
+  tags: update-conf
+
+- name: generate default variables
+  template:
+    src: "env.j2"
+    dest: "/etc/default/{{ vault_user_name }}"
+    group: "{{ vault_user_name }}"
+    mode: "0640"
+  notify: restart vault
+
+- name: generate rsyslog configuration
+  copy:
+    dest: "/etc/rsyslog.d/vault.conf"
+    mode: 0640
+    content: |-
+      :programname, contains, "vault" {{ vault_log_dest }}
+      & stop
+  notify: restart rsyslog
+  tags: update-rsyslog
+
+- name: generate file consul-root-node.cer
+  shell: >-
+    cat /etc/consul.d/tls/consul-node.cer > /etc/consul.d/tls/consul-root-node.cer
+    && cat /etc/consul.d/tls/consul-root.cer >> /etc/consul.d/tls/consul-root-node.cer
+    && chown root:consul /etc/consul.d/tls/consul-root-node.cer
+    && chmod 640 /etc/consul.d/tls/consul-root-node.cer
+  changed_when: False
+
+- name: generate systemd service
+  template:
+    src: "vault.service.j2"
+    dest: "/etc/systemd/system/vault.service"
+    mode: "0640"
+  notify: restart vault
+  tags: update-conf
+
+- name: enable vault service
+  service:
+    name: "{{ vault_user_name }}"
+    state: started
+    enabled: yes
+  tags: update-conf
+
+- name: configure env vars for vault cli
+  lineinfile:
+    path: /root/.bashrc
+    regexp: "^export {{ item.name }}"
+    line: "export {{ item.name }}=\"{{ item.value }}\""
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - name: "VAULT_ADDR"
+      value: "http://{{ inventory_hostname }}.node.dc1.consul:8200"
+  tags: cli
+  tags: update-conf

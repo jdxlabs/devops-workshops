@@ -1,0 +1,18 @@
+---
+vault_version: "0.9.1"
+vault_archive_sum: "6308013ee0d6278e98cdfe8d6de0162102a8d25f3bcd1e3737bf7b022a9f6702"
+
+vault_url_prefix: "https://releases.hashicorp.com/vault/{{ vault_version }}"
+vault_archive_name: "vault_{{ vault_version }}_linux_amd64.zip"
+vault_archive_dest: "{{ vault_cache_dir }}/{{ vault_archive_name }}"
+vault_archive_url: "{{ vault_url_prefix }}/{{ vault_archive_name }}"
+
+vault_config_file: "/etc/vault.conf"
+
+vault_log_dest: "/var/log/vault.log"
+
+vault_user_name: "vault"
+vault_user_id: "803"
+vault_cache_dir: "/var/cache/run"
+
+vault_cluster_name: "dc1"

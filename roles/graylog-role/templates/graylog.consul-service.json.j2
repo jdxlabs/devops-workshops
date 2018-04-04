@@ -1,0 +1,11 @@
+{
+  "service": {
+    "name": "graylog",
+    "tags": [
+      "traefik.frontend.entrypoints=http,https",
+      "traefik.frontend.rule=Host:graylog.{{ dns_public_domain }}",
+      "traefik.tags=public"
+    ],
+    "port": 9000
+  }
+}

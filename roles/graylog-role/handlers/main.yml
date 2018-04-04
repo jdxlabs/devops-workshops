@@ -1,0 +1,27 @@
+---
+- name: reload systemd configuration
+  command: systemctl daemon-reload
+
+- name: restart graylog-server
+  service:
+    name: 'graylog-server'
+    state: restarted
+    enabled: yes
+
+- name: restart elasticsearch
+  systemd:
+    name: "elasticsearch"
+    state: restarted
+    enabled: yes
+
+- name: restart mongodb
+  service:
+    name: 'mongodb'
+    state: restarted
+    enabled: yes
+
+- name: restart consul
+  service:
+    name: consul
+    state: restarted
+    enabled: yes

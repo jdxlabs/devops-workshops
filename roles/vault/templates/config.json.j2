@@ -1,0 +1,13 @@
+disable_mlock = true
+
+cluster_name = "{{ vault_cluster_name }}"
+
+storage "consul" {
+  address = "127.0.0.1:8500"
+  path    = "vault"
+}
+
+listener "tcp" {
+  address = "{{ inventory_hostname }}.node.dc1.consul:8200"
+  tls_disable = true
+}

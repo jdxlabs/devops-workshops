@@ -1,0 +1,12 @@
+---
+- name: restart nomad
+  systemd:
+    name: "{{ nomad_worker_user_name }}"
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
