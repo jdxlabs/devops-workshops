@@ -78,14 +78,6 @@
   notify: restart rsyslog
   tags: update-rsyslog
 
-- name: generate file consul-root-node.cer
-  shell: >-
-    cat /etc/consul.d/tls/consul-node.cer > /etc/consul.d/tls/consul-root-node.cer
-    && cat /etc/consul.d/tls/consul-root.cer >> /etc/consul.d/tls/consul-root-node.cer
-    && chown root:consul /etc/consul.d/tls/consul-root-node.cer
-    && chmod 640 /etc/consul.d/tls/consul-root-node.cer
-  changed_when: False
-
 - name: generate systemd service
   template:
     src: "vault.service.j2"
