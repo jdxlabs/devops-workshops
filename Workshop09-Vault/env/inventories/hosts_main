@@ -1,9 +1,0 @@
-[bastion]
-BASTION_AWS
-
-[consul-servers-bootstrap:children]
-vault-servers
-
-[vault-servers]
-vault-server-0
-

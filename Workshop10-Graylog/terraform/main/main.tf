@@ -146,6 +146,13 @@ resource "aws_security_group" "consul_group" {
   vpc_id      = "${aws_vpc.vpc.id}"
 
   ingress {
+    from_port       = 5000
+    to_port         = 5999
+    protocol        = "TCP"
+    security_groups = ["${aws_security_group.bastion_realm.id}"]
+  }
+
+  ingress {
     from_port       = 8300
     to_port         = 8302
     protocol        = "TCP"

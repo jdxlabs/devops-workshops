@@ -1,0 +1,7 @@
+---
+
+graylog_input_syslogudp_port: 5001
+graylog_udp_destination: >-
+  @{{ hostvars[groups['logstores'][0]].ansible_default_ipv4.address }}:{{ graylog_input_syslogudp_port}};RSYSLOG_SyslogProtocol23Format
+
+consul_log_dest: "{{ graylog_udp_destination }}"

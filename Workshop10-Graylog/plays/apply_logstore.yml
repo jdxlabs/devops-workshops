@@ -1,0 +1,10 @@
+---
+- hosts: logstores
+  become: yes
+
+  tags:
+    - graylog
+  roles:
+    - graylog-role
+
+- import_playbook: _logstore_graylog-inputs.yml

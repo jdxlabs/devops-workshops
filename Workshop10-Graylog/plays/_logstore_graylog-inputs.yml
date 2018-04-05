@@ -1,0 +1,63 @@
+---
+- hosts: all
+
+- hosts: logstores
+  become: yes
+  tags:
+    - rsyslog
+
+  vars:
+    graylog_input_syslog_name: "SyslogUDP"
+    graylog_input_syslog:
+      title: "{{ graylog_input_syslog_name }}"
+      type: "org.graylog2.inputs.syslog.udp.SyslogUDPInput"
+      global: true
+      configuration:
+        expand_structured_data: false
+        recv_buffer_size: 262144
+        port: "{{ graylog_input_syslogudp_port }}"
+        override_source: null
+        force_rdns: false
+        allow_override_date: true
+        bind_address: "0.0.0.0"
+        store_full_message: false
+
+  tasks:
+    - name: wait for Graylog server to startup
+      wait_for:
+        host: "{{ ansible_default_ipv4.address }}"
+        port: 9000
+        timeout: 60
+      delegate_to: logstore-0
+
+    - name: get rest token
+      uri:
+        url: "http://{{ ansible_default_ipv4.address }}:9000/api/system/sessions"
+        method: POST
+        body:
+          username: admin
+          password: "{{ graylog_admin_password }}"
+          host: ""
+        body_format: json
+      register: token
+
+    - name: list the input
+      uri:
+        url: http://{{ ansible_default_ipv4.address }}:9000/api/system/inputs
+        method: GET
+        url_username: "{{ token.json.session_id }}"
+        url_password: session
+        force_basic_auth: yes
+      register: inputs
+
+    - name: create the input
+      uri:
+        url: http://{{ ansible_default_ipv4.address }}:9000/api/system/inputs
+        method: POST
+        body: "{{ graylog_input_syslog }}"
+        body_format: json
+        url_username: "{{ token.json.session_id }}"
+        url_password: session
+        force_basic_auth: yes
+        status_code: 200,201
+      when: not graylog_input_syslog_name in (inputs.json | json_query('inputs[*].title'))
