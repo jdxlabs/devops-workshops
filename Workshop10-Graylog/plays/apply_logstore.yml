@@ -2,6 +2,9 @@
 - hosts: logstores
   become: yes
 
+  vars_files:
+    - "{{ playbook_dir }}/../envvars.yml"
+
   tags:
     - graylog
   roles:

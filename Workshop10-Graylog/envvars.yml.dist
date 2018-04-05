@@ -1,2 +1,4 @@
 ---
 initials: '<your-initials>'
+graylog_admin_password: '<your-password>'
+graylog_server_salt: '<your-salt>'
