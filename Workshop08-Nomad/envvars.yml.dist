@@ -1,4 +1,4 @@
 ---
 initials: '<your-initials>'
 aws_account_id: <your-account-id>
-nomad_dc_name: '<you-choose>'
+bootstrap_img: "bootstrap-nomad-{{ initials }}"

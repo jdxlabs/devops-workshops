@@ -190,8 +190,8 @@ ansible-playbook plays/apply_consul.yml
 ansible-playbook plays/apply_nomad_masters.yml
 ansible-playbook plays/apply_nomad_workers.yml
 ansible-playbook plays/nomad_push_job.yml
-...
 
+ssh -F env-ssh.cfg admin@nomad-master-0
 consul members
 # Node             Address            Status  Type    Build  Protocol  DC
 # consul-client-0  10.0.110.18:8301   alive   client  0.9.2  2         dc1
@@ -199,7 +199,11 @@ consul members
 
 nomad server-members
 nomad node-status
-...
+nomad run nomad/jobs/bootstrap-nomad.hcl
+nomad status bootstrap-nomad
+
+ssh -F env-ssh.cfg admin@nomad-worker-0
+curl http://<current-ip>:11201
 
 ansible-playbook plays/destroy.yml -e layer_name=main
 ```
