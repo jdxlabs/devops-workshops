@@ -193,10 +193,6 @@ ansible-playbook plays/nomad_push_job.yml
 
 ssh -F env-ssh.cfg admin@nomad-master-0
 consul members
-# Node             Address            Status  Type    Build  Protocol  DC
-# consul-client-0  10.0.110.18:8301   alive   client  0.9.2  2         dc1
-# consul-master-0  10.0.110.221:8301  alive   server  0.9.2  2         dc1
-
 nomad server-members
 nomad node-status
 nomad run nomad/jobs/bootstrap-nomad.hcl
@@ -204,6 +200,51 @@ nomad status bootstrap-nomad
 
 ssh -F env-ssh.cfg admin@nomad-worker-0
 curl http://<current-ip>:11201
+
+ansible-playbook plays/destroy.yml -e layer_name=main
+```
+
+
+## Workshop09 : Vault
+
+### Commands
+```
+cd ./Workshop09-Vault
+ansible-playbook plays/build.yml -e layer_name=main
+ansible-playbook plays/apply_consul.yml
+ansible-playbook plays/apply_vault.yml
+ansible-playbook plays/vault_init.yml
+
+ssh -F env-ssh.cfg admin@vault-server-0
+consul members
+vault status
+
+vault init
+vault unseal <key> (x3)
+vault auth <token>
+vault status
+
+vault write secret/toto value=tata
+vault read secret/toto
+...
+
+ansible-playbook plays/destroy.yml -e layer_name=main
+```
+
+
+## Workshop10 : Graylog
+
+### Commands
+```
+cd ./Workshop10-Graylog
+ansible-playbook plays/build.yml -e layer_name=main
+ansible-playbook plays/apply_consul.yml
+ansible-playbook plays/apply_logstore.yml
+
+ssh -F env-ssh.cfg admin@consul-master-0
+consul members
+
+...
 
 ansible-playbook plays/destroy.yml -e layer_name=main
 ```

@@ -103,6 +103,6 @@
     mode: 0644
   with_items:
     - name: "VAULT_ADDR"
-      value: "http://{{ inventory_hostname }}.node.dc1.consul:8200"
+      value: "http://127.0.0.1:8200"
   tags: cli
   tags: update-conf

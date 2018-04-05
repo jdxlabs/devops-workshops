@@ -1,0 +1,6 @@
+---
+- hosts: "{{ target | default('vault-servers') }}"
+  become: yes
+
+  roles:
+    - vault
