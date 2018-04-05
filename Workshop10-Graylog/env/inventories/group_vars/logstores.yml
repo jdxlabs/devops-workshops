@@ -1,2 +1,2 @@
 ---
-dns_public_domain: 'example.com'
+graylog_input_syslogudp_port: 5001

@@ -28,14 +28,14 @@
   tasks:
     - name: wait for Graylog server to startup
       wait_for:
-        host: "{{ ansible_default_ipv4.address }}"
+        host: "127.0.0.1"
         port: 9000
         timeout: 60
       delegate_to: logstore-0
 
     - name: get rest token
       uri:
-        url: "http://{{ ansible_default_ipv4.address }}:9000/api/system/sessions"
+        url: "http://127.0.0.1:9000/api/system/sessions"
         method: POST
         body:
           username: admin
@@ -46,7 +46,7 @@
 
     - name: list the input
       uri:
-        url: http://{{ ansible_default_ipv4.address }}:9000/api/system/inputs
+        url: http://127.0.0.1:9000/api/system/inputs
         method: GET
         url_username: "{{ token.json.session_id }}"
         url_password: session
@@ -55,7 +55,7 @@
 
     - name: create the input
       uri:
-        url: http://{{ ansible_default_ipv4.address }}:9000/api/system/inputs
+        url: http://127.0.0.1:9000/api/system/inputs
         method: POST
         body: "{{ graylog_input_syslog }}"
         body_format: json
