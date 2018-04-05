@@ -1,0 +1,11 @@
+[bastion]
+BASTION_AWS
+
+[consul-servers-bootstrap:children]
+vault-servers
+
+[vault-servers]
+{% for instance in all_terraform_outputs.vault_servers.value %}
+vault-server-{{ loop.index0 }}
+{% endfor %}
+

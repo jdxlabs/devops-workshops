@@ -1,0 +1,44 @@
+---
+- name: generate ssh.cfg for bastion
+  blockinfile:
+    path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
+    create: yes
+    marker: '# {mark} BASTION'
+    block: |
+      Host BASTION_AWS
+        Hostname {{ all_terraform_outputs.bastion.value }}
+        StrictHostKeyChecking no
+        User admin
+        IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
+
+- name: generate ssh.cfg for consul masters
+  blockinfile:
+    path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
+    create: yes
+    marker: '# {mark} CONSUL_MASTERS'
+    insertafter: "# END BASTION"
+    block: |
+      {% for instance in all_terraform_outputs.consul_masters.value %}
+      Host consul-master-{{ loop.index0 }} {{ instance }}
+        Hostname {{ instance }}
+        StrictHostKeyChecking no
+        ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS
+        User admin
+        IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
+      {% endfor %}
+
+- name: generate ssh.cfg for logstores
+  blockinfile:
+    path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
+    create: yes
+    marker: '# {mark} LOGSTORES'
+    insertafter: "# END CONSUL_MASTERS"
+    block: |
+      {% for instance in all_terraform_outputs.logstores.value %}
+      Host logstore-{{ loop.index0 }} {{ instance }}
+        Hostname {{ instance }}
+        StrictHostKeyChecking no
+        ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS
+        User admin
+        IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
+      {% endfor %}
