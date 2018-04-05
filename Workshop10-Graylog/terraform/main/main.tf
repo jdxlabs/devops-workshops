@@ -115,6 +115,39 @@ resource "aws_security_group" "bastion_ingress" {
   }
 }
 
+resource "aws_security_group" "logstore_ingress" {
+  name_prefix = "${var.project_name}-${var.initials}-logstore-ingress"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "TCP"
+    cidr_blocks = ["${var.bastion_ingress_cidr}"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "TCP"
+    cidr_blocks = ["${var.bastion_ingress_cidr}"]
+  }
+
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "TCP"
+    cidr_blocks = ["${var.bastion_ingress_cidr}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "bastion_realm" {
   name_prefix = "${var.project_name}-${var.initials}-bastion-realm"
   vpc_id      = "${aws_vpc.vpc.id}"
@@ -303,11 +336,10 @@ resource "aws_instance" "logstores" {
     device_name = "${var.instances_logstores["ebs_hdd_name"]}"
   }
 
-  subnet_id = "${aws_subnet.private_subnet.id}"
+  subnet_id = "${aws_subnet.public_subnet.id}"
 
   vpc_security_group_ids = [
-    "${aws_security_group.bastion_realm.id}",
-    "${aws_security_group.consul_group.id}"
+    "${aws_security_group.logstore_ingress.id}"
   ]
 
   lifecycle {
@@ -317,4 +349,6 @@ resource "aws_instance" "logstores" {
   tags {
     Name = "${var.project_name}-${var.initials}-logstore-${count.index}"
   }
+
+  associate_public_ip_address = true
 }

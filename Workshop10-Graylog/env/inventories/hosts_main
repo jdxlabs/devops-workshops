@@ -6,7 +6,6 @@ consul-masters
 
 [consul-realm:children]
 consul-masters
-logstores
 
 [consul-masters]
 consul-master-0

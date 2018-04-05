@@ -7,5 +7,5 @@ output "consul_masters" {
 }
 
 output "logstores" {
-  value = ["${aws_instance.logstores.*.private_ip}"]
+  value = ["${aws_instance.logstores.*.public_ip}"]
 }

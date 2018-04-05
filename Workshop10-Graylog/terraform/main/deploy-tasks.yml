@@ -38,7 +38,6 @@
       Host logstore-{{ loop.index0 }} {{ instance }}
         Hostname {{ instance }}
         StrictHostKeyChecking no
-        ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS
         User admin
         IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
       {% endfor %}

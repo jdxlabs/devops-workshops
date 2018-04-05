@@ -40,6 +40,7 @@
     owner: graylog
     group: graylog
     mode: '0644'
+  tags: update-conf
   notify: restart graylog-server
 
 - name: Graylog server defaults should be configured
@@ -49,17 +50,12 @@
     owner: graylog
     group: graylog
     mode: '0644'
+  tags: update-conf
   notify: restart graylog-server
 
 - name: Graylog server should start after reboot
   file:
     path: '/etc/init/graylog-server.override'
     state: absent
-
-- name: Declare Graylog to Consul
-  template:
-    src: "graylog.consul-service.json.j2"
-    dest: "/etc/consul.d/graylog.consul-service.json"
-  notify: restart consul
 
 - meta: flush_handlers

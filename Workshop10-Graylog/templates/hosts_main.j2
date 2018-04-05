@@ -6,7 +6,6 @@ consul-masters
 
 [consul-realm:children]
 consul-masters
-logstores
 
 [consul-masters]
 {% for instance in all_terraform_outputs.consul_masters.value %}

@@ -19,9 +19,3 @@
     name: 'mongodb'
     state: restarted
     enabled: yes
-
-- name: restart consul
-  service:
-    name: consul
-    state: restarted
-    enabled: yes
