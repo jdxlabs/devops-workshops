@@ -11,15 +11,15 @@
         User admin
         IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
 
-- name: generate ssh.cfg for consul masters
+- name: generate ssh.cfg for nomad masters
   blockinfile:
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
-    marker: '# {mark} CONSUL_MASTERS'
+    marker: '# {mark} NOMAD_MASTERS'
     insertafter: "# END BASTION"
     block: |
-      {% for instance in all_terraform_outputs.consul_masters.value %}
-      Host consul-master-{{ loop.index0 }} {{ instance }}
+      {% for instance in all_terraform_outputs.nomad_masters.value %}
+      Host nomad-master-{{ loop.index0 }} {{ instance }}
         Hostname {{ instance }}
         StrictHostKeyChecking no
         ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS
@@ -27,15 +27,15 @@
         IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
       {% endfor %}
 
-- name: generate ssh.cfg for consul clients
+- name: generate ssh.cfg for nomad workers
   blockinfile:
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
-    marker: '# {mark} CONSUL_CLIENTS'
-    insertafter: "# END CONSUL_MASTERS"
+    marker: '# {mark} NOMAD_WORKERS'
+    insertafter: "# END NOMAD_MASTERS"
     block: |
-      {% for instance in all_terraform_outputs.consul_clients.value %}
-      Host consul-client-{{ loop.index0 }} {{ instance }}
+      {% for instance in all_terraform_outputs.nomad_workers.value %}
+      Host nomad-worker-{{ loop.index0 }} {{ instance }}
         Hostname {{ instance }}
         StrictHostKeyChecking no
         ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS

@@ -1,0 +1,31 @@
+---
+- hosts: "{{ target | default('nomad-workers') }}"
+  any_errors_fatal: true
+  become: yes
+  tags:
+    - iptables
+
+  tasks:
+# https://github.com/moby/moby/issues/14627
+# need to autorize docker0 to redirect to local loopback
+# sysctl -w net.ipv4.conf.docker0.route_localnet=1
+    - sysctl:
+        name: net.ipv4.conf.docker0.route_localnet
+        value: 1
+        sysctl_set: yes
+
+# iptables -t nat -A PREROUTING -d 172.17.0.0/16 -i docker0 -p tcp -m tcp --dport 53 -j DNAT --to-destination 127.0.0.1:53
+# iptables -t nat -A PREROUTING -d 172.17.0.0/16 -i docker0 -p udp -m udp --dport 53 -j DNAT --to-destination 127.0.0.1:53
+    - iptables:
+        table: nat
+        chain: PREROUTING
+        protocol: "{{ item }}"
+        match: "{{ item }}"
+        in_interface: docker0
+        destination: 172.17.0.0/16
+        destination_port: 53
+        jump: DNAT
+        to_destination: 127.0.0.1:53
+      with_items:
+        - tcp
+        - udp

@@ -1,0 +1,87 @@
+---
+- hosts: "{{ target | default('nomad-workers') }}"
+  any_errors_fatal: true
+  become: yes
+
+  tasks:
+    - apt:
+        name: awscli
+        state: absent
+    - apt:
+        name: python-pip
+        state: present
+    - shell: >-
+        pip install awscli --upgrade
+      changed_when: false
+
+- hosts: "{{ target | default('nomad-workers') }}"
+  any_errors_fatal: true
+  become: yes
+  tags:
+    - ecr
+
+  vars_files:
+    - "{{ playbook_dir }}/../envvars.yml"
+
+  vars:
+    nomad_worker_config_dir: "/etc/nomad.d"
+    nomad_worker_user_name: "nomad"
+
+  tasks:
+    - name: Get Official AWS ECR Helper
+      copy:
+        src: "{{ playbook_dir }}/../files/docker-credential-ecr"
+        dest: /usr/local/bin/docker-credential-ecr
+        mode: 0755
+
+    - name: Prepare expected config folders
+      file:
+        path: "/root/{{ item }}"
+        state: directory
+        mode: 0644
+      with_items:
+        - .docker
+        - .aws
+        - .ecr
+
+    - name: Set AWS Credentials file (for default region)
+      copy:
+        src: "{{ playbook_dir }}/../files/aws-default-creds"
+        dest: /root/.aws/credentials
+        mode: 0644
+
+    - name: Set AWS Config file (for default region)
+      copy:
+        src: "{{ playbook_dir }}/../files/aws-default-config"
+        dest: /root/.aws/config
+        mode: 0644
+
+    - name: Remove Docker config (needed for ECR configuration..)
+      file:
+        path: /root/.docker/config.json
+        state: absent
+
+    - name: ECR Connect
+      shell: >-
+        aws ecr get-login --no-include-email --region {{ target_region }}
+      register: "docker_login_cmd"
+
+    - name: Docker Login
+      shell: "{{ docker_login_cmd.stdout }}"
+
+    - name: Set Docker Auth file for Root user
+      copy:
+        src: "{{ playbook_dir }}/../files/docker-auth-config.json"
+        dest: /root/.docker/config.json
+        mode: "0640"
+
+    - name: Pull a sample docker image (to generate the Ecr config)
+      shell: >-
+        docker pull {{ aws_account_id }}.dkr.ecr.{{ target_region }}.amazonaws.com/{{ bootstrap_img }}:latest
+
+    - name: Restart nomad
+      systemd:
+        name: "{{ nomad_worker_user_name }}"
+        state: restarted
+        enabled: yes
+        daemon_reload: yes

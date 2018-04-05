@@ -1,0 +1,48 @@
+job "bootstrap-nomad" {
+  datacenters = ["{{ nomad_dc_name }}"]
+  type = "service"
+
+  update {
+    max_parallel = 1
+    stagger = "30s"
+  }
+
+  group "microservices" {
+    count = 1
+
+    restart {
+      attempts = 10
+      delay = "10s"
+      interval = "5m"
+      mode = "delay"
+    }
+
+    task "bootstrap-nomad" {
+      driver = "docker"
+
+      config {
+        image = "{{ aws_account_id }}.dkr.ecr.{{ target_region }}.amazonaws.com/{{ bootstrap_img }}:latest"
+        force_pull = true
+        port_map {
+          web = 8080
+        }
+        dns_servers = ["172.17.0.1"]
+      }
+
+      service {
+        port = "web"
+      }
+
+      resources {
+        cpu    = 100 # MHz
+        memory = 100 # MB
+        network {
+          mbits = 10
+          port "web" {
+            static = "11201"
+          }
+        }
+      }
+    }
+  }
+}

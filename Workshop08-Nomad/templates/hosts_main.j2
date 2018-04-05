@@ -2,14 +2,17 @@
 BASTION_AWS
 
 [consul-servers-bootstrap:children]
-consul-masters
+nomad-masters
 
-[consul-masters]
-{% for instance in all_terraform_outputs.consul_masters.value %}
-consul-master-{{ loop.index0 }}
+[nomad-servers-bootstrap:children]
+nomad-masters
+
+[nomad-masters]
+{% for instance in all_terraform_outputs.nomad_masters.value %}
+nomad-master-{{ loop.index0 }}
 {% endfor %}
 
-[consul-clients]
-{% for instance in all_terraform_outputs.consul_clients.value %}
-consul-client-{{ loop.index0 }}
+[nomad-workers]
+{% for instance in all_terraform_outputs.nomad_workers.value %}
+nomad-worker-{{ loop.index0 }}
 {% endfor %}

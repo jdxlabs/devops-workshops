@@ -1,0 +1,15 @@
+---
+- hosts: "{{ target | default('nomad-workers') }}"
+  any_errors_fatal: true
+  become: yes
+  tags:
+    - nomad-worker
+    - nomad
+    - docker
+
+  roles:
+    - nomad-worker
+    - docker
+
+- import_playbook: _nomad-wkrs_iptables.yml
+- import_playbook: _nomad-wkrs_ecr.yml

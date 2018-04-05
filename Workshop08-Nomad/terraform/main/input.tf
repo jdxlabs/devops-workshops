@@ -30,11 +30,11 @@ variable "bastion_ingress_cidr" {
   type = "list"
 }
 
-variable "instances_consul_masters" {
+variable "instances_nomad_masters" {
   type = "map"
 }
 
-variable "instances_consul_clients" {
+variable "instances_nomad_workers" {
   type = "map"
 }
 

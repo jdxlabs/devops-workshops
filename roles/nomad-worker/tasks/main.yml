@@ -79,7 +79,7 @@
 
 - name: create nomad environment file
   template:
-    src: "{{ playbook_dir }}/../../templates/default_nomad.j2"
+    src: "default_nomad.j2"
     dest: "/etc/default/nomad"
   tags: update-conf
 

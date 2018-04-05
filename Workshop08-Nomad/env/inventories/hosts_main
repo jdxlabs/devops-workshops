@@ -1,0 +1,14 @@
+[bastion]
+BASTION_AWS
+
+[consul-servers-bootstrap:children]
+nomad-masters
+
+[nomad-servers-bootstrap:children]
+nomad-masters
+
+[nomad-masters]
+nomad-master-0
+
+[nomad-workers]
+nomad-worker-0

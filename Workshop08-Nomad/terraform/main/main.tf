@@ -174,6 +174,33 @@ resource "aws_security_group" "consul_group" {
   }
 }
 
+resource "aws_security_group" "nomad_realm" {
+  name_prefix = "${var.project_name}-${var.initials}-nomad-realm"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  ingress {
+    from_port       = 4646
+    to_port         = 4648
+    protocol        = "TCP"
+    security_groups = ["${aws_security_group.bastion_realm.id}"]
+  }
+
+  # containers ports
+  ingress {
+    from_port       = 20000
+    to_port         = 60000
+    protocol        = "TCP"
+    security_groups = ["${aws_security_group.bastion_realm.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 # IAM profile
 
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -210,8 +237,20 @@ resource "aws_iam_role_policy" "instance_role_policy" {
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": "ec2:Describe*",
-      "Resource": "*"
+      "Action": [
+          "ec2:Describe*",
+          "autoscaling:Describe*",
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetRepositoryPolicy",
+          "ecr:DescribeRepositories",
+          "ecr:ListImages",
+          "ecr:BatchGetImage"
+      ],
+      "Resource": [
+          "*"
+      ]
     }
   ]
 }
@@ -249,23 +288,24 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
 }
 
-resource "aws_instance" "consul_masters" {
-  count                = "${var.instances_consul_masters["nb"]}"
+resource "aws_instance" "nomad_masters" {
+  count                = "${var.instances_nomad_masters["nb"]}"
   ami                  = "${data.aws_ami.debian.id}"
-  instance_type        = "${var.instances_consul_masters["type"]}"
+  instance_type        = "${var.instances_nomad_masters["type"]}"
   iam_instance_profile = "${aws_iam_instance_profile.instance_profile.name}"
   key_name             = "${aws_key_pair.bastion_keypair.key_name}"
 
   root_block_device = {
-    volume_size = "${var.instances_consul_masters["root_hdd_size"]}"
-    volume_type = "${var.instances_consul_masters["root_hdd_type"]}"
+    volume_size = "${var.instances_nomad_masters["root_hdd_size"]}"
+    volume_type = "${var.instances_nomad_masters["root_hdd_type"]}"
   }
 
   subnet_id = "${aws_subnet.private_subnet.id}"
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_realm.id}",
-    "${aws_security_group.consul_group.id}"
+    "${aws_security_group.consul_group.id}",
+    "${aws_security_group.nomad_realm.id}"
   ]
 
   lifecycle {
@@ -273,28 +313,35 @@ resource "aws_instance" "consul_masters" {
   }
 
   tags {
-    Name = "${var.project_name}-${var.initials}-consul-master-${count.index}"
+    Name = "${var.project_name}-${var.initials}-nomad-master-${count.index}"
   }
 }
 
 
-resource "aws_instance" "consul_clients" {
-  count                = "${var.instances_consul_clients["nb"]}"
+resource "aws_instance" "nomad_workers" {
+  count                = "${var.instances_nomad_workers["nb"]}"
   ami                  = "${data.aws_ami.debian.id}"
-  instance_type        = "${var.instances_consul_clients["type"]}"
+  instance_type        = "${var.instances_nomad_workers["type"]}"
   iam_instance_profile = "${aws_iam_instance_profile.instance_profile.name}"
   key_name             = "${aws_key_pair.bastion_keypair.key_name}"
 
   root_block_device = {
-    volume_size = "${var.instances_consul_clients["root_hdd_size"]}"
-    volume_type = "${var.instances_consul_clients["root_hdd_type"]}"
+    volume_size = "${var.instances_nomad_workers["root_hdd_size"]}"
+    volume_type = "${var.instances_nomad_workers["root_hdd_type"]}"
+  }
+
+  ebs_block_device = {
+    volume_size = "${var.instances_nomad_workers["ebs_hdd_size"]}"
+    volume_type = "${var.instances_nomad_workers["ebs_hdd_type"]}"
+    device_name = "${var.instances_nomad_workers["ebs_hdd_name"]}"
   }
 
   subnet_id = "${aws_subnet.private_subnet.id}"
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_realm.id}",
-    "${aws_security_group.consul_group.id}"
+    "${aws_security_group.consul_group.id}",
+    "${aws_security_group.nomad_realm.id}"
   ]
 
   lifecycle {
@@ -302,6 +349,6 @@ resource "aws_instance" "consul_clients" {
   }
 
   tags {
-    Name = "${var.project_name}-${var.initials}-consul-client-${count.index}"
+    Name = "${var.project_name}-${var.initials}-nomad-worker-${count.index}"
   }
 }
