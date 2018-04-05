@@ -308,6 +308,6 @@ resource "aws_instance" "logstores" {
   }
 
   tags {
-    Name = "${var.project_name}-${var.initials}-consul-client-${count.index}"
+    Name = "${var.project_name}-${var.initials}-logstore-${count.index}"
   }
 }

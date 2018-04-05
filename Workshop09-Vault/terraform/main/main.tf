@@ -273,6 +273,6 @@ resource "aws_instance" "vault_servers" {
   }
 
   tags {
-    Name = "${var.project_name}-${var.initials}-consul-master-${count.index}"
+    Name = "${var.project_name}-${var.initials}-vault-server-${count.index}"
   }
 }
