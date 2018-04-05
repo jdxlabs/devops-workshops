@@ -6,6 +6,9 @@
   tags:
     - rsyslog
 
+  vars_files:
+    - "{{ playbook_dir }}/../envvars.yml"
+
   vars:
     graylog_input_syslog_name: "SyslogUDP"
     graylog_input_syslog:
