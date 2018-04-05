@@ -24,3 +24,4 @@ consul_mode: "node"
 consul_masters_group_name: "consul-servers-bootstrap"
 
 consul_log_dest: "/var/log/consul.log"
+consul_log_level: "info"

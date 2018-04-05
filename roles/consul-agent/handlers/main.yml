@@ -5,8 +5,10 @@
     state: restarted
     enabled: yes
     daemon_reload: yes
+  tags: update-conf
 
 - name: restart rsyslog
   service:
     name: rsyslog
     state: restarted
+  tags: update-conf

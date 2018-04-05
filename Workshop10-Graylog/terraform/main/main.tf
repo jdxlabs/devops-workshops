@@ -127,10 +127,10 @@ resource "aws_security_group" "logstore_ingress" {
   }
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "TCP"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 5000
+    to_port         = 5999
+    protocol        = "UDP"
+    security_groups = ["${aws_security_group.bastion_realm.id}"]
   }
 
   ingress {
@@ -159,13 +159,6 @@ resource "aws_security_group" "bastion_realm" {
     security_groups = ["${aws_security_group.bastion_ingress.id}"]
   }
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "TCP"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -177,13 +170,6 @@ resource "aws_security_group" "bastion_realm" {
 resource "aws_security_group" "consul_group" {
   name_prefix = "${var.project_name}-${var.initials}-consul-group"
   vpc_id      = "${aws_vpc.vpc.id}"
-
-  ingress {
-    from_port       = 5000
-    to_port         = 5999
-    protocol        = "TCP"
-    security_groups = ["${aws_security_group.bastion_realm.id}"]
-  }
 
   ingress {
     from_port       = 8300
@@ -224,6 +210,7 @@ resource "aws_iam_instance_profile" "instance_profile" {
 resource "aws_iam_role" "instance_role" {
   name = "${var.project_name}-${var.initials}-instance-role"
   path = "/"
+
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -244,6 +231,7 @@ EOF
 resource "aws_iam_role_policy" "instance_role_policy" {
   name = "${var.project_name}-${var.initials}-instance-role-policy"
   role = "${aws_iam_role.instance_role.id}"
+
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -305,7 +293,7 @@ resource "aws_instance" "consul_masters" {
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_realm.id}",
-    "${aws_security_group.consul_group.id}"
+    "${aws_security_group.consul_group.id}",
   ]
 
   lifecycle {
@@ -317,6 +305,33 @@ resource "aws_instance" "consul_masters" {
   }
 }
 
+resource "aws_instance" "consul_clients" {
+  count                = "${var.instances_consul_clients["nb"]}"
+  ami                  = "${data.aws_ami.debian.id}"
+  instance_type        = "${var.instances_consul_clients["type"]}"
+  iam_instance_profile = "${aws_iam_instance_profile.instance_profile.name}"
+  key_name             = "${aws_key_pair.bastion_keypair.key_name}"
+
+  root_block_device = {
+    volume_size = "${var.instances_consul_clients["root_hdd_size"]}"
+    volume_type = "${var.instances_consul_clients["root_hdd_type"]}"
+  }
+
+  subnet_id = "${aws_subnet.private_subnet.id}"
+
+  vpc_security_group_ids = [
+    "${aws_security_group.bastion_realm.id}",
+    "${aws_security_group.consul_group.id}"
+  ]
+
+  lifecycle {
+    ignore_changes = ["instance_type", "user_data", "root_block_device", "ebs_block_device"]
+  }
+
+  tags {
+    Name = "${var.project_name}-${var.initials}-consul-client-${count.index}"
+  }
+}
 
 resource "aws_instance" "logstores" {
   count                = "${var.instances_logstores["nb"]}"
@@ -339,7 +354,7 @@ resource "aws_instance" "logstores" {
   subnet_id = "${aws_subnet.public_subnet.id}"
 
   vpc_security_group_ids = [
-    "${aws_security_group.logstore_ingress.id}"
+    "${aws_security_group.logstore_ingress.id}",
   ]
 
   lifecycle {

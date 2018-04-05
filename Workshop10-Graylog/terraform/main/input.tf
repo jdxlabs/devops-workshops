@@ -34,6 +34,10 @@ variable "instances_consul_masters" {
   type = "map"
 }
 
+variable "instances_consul_clients" {
+  type = "map"
+}
+
 variable "instances_logstores" {
   type = "map"
 }

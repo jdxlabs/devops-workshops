@@ -58,6 +58,7 @@
     dest: "{{ consul_config_dir }}/config.json"
     group: "{{ consul_user_name }}"
     mode: 0640
+  tags: update-conf
   notify: restart consul
 
 - name: generate default variables
@@ -66,15 +67,17 @@
     dest: "/etc/default/consul"
     group: "{{ consul_user_name }}"
     mode: 0640
+  tags: update-conf
   notify: restart consul
 
 - name: generate rsyslog configuration
   copy:
     dest: "/etc/rsyslog.d/consul.conf"
     mode: 0644
-    content: >-
-      :programname, isequal, "consul" {{ consul_log_dest }}
+    content: |-
+      :programname, contains, "consul" {{ consul_log_dest }}
       & stop
+  tags: update-conf
   notify: restart rsyslog
 
 - name: generate systemd service
@@ -82,6 +85,7 @@
     src: "consul.service.{{ consul_mode }}.j2"
     dest: "/etc/systemd/system/consul.service"
     mode: 0640
+  tags: update-conf
   notify: restart consul
 
 - name: at last consul is made available
@@ -89,3 +93,4 @@
     name: "{{ consul_user_name }}"
     state: started
     enabled: yes
+  tags: update-conf

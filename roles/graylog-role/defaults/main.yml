@@ -133,7 +133,8 @@ graylog_trusted_proxies:                   ''
 # Web UI
 graylog_web_enable:                  'True'
 graylog_web_listen_uri:              "http://127.0.0.1:9000/"
-graylog_web_endpoint_uri:            "http://127.0.0.1:80/api"
+graylog_web_endpoint_uri:            ""
+# graylog_web_endpoint_uri:            "http://127.0.0.1:8080/api"
 graylog_enable_cors:                 'True'
 graylog_enable_gzip:                 'True'
 graylog_web_enable_tls:              'False'

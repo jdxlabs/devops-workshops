@@ -27,12 +27,28 @@
         IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
       {% endfor %}
 
+- name: generate ssh.cfg for consul clients
+  blockinfile:
+    path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
+    create: yes
+    marker: '# {mark} CONSUL_CLIENTS'
+    insertafter: "# END CONSUL_MASTERS"
+    block: |
+      {% for instance in all_terraform_outputs.consul_clients.value %}
+      Host consul-client-{{ loop.index0 }} {{ instance }}
+        Hostname {{ instance }}
+        StrictHostKeyChecking no
+        ProxyCommand ssh -t -F ./{{ target_name }}-ssh.cfg -W %h:%p BASTION_AWS
+        User admin
+        IdentityFile ~/.ssh/{{ ssh_key_name }}-{{ initials }}
+      {% endfor %}
+
 - name: generate ssh.cfg for logstores
   blockinfile:
     path: "{{ playbook_dir }}/../{{ target_name }}-ssh.cfg"
     create: yes
     marker: '# {mark} LOGSTORES'
-    insertafter: "# END CONSUL_MASTERS"
+    insertafter: "# END CONSUL_CLIENTS"
     block: |
       {% for instance in all_terraform_outputs.logstores.value %}
       Host logstore-{{ loop.index0 }} {{ instance }}

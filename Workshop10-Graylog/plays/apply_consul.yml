@@ -1,7 +1,7 @@
 ---
 - hosts: logstores
 
-- hosts: consul-masters
+- hosts: consul-realm
   become: yes
   tags:
     - agents

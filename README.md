@@ -244,6 +244,8 @@ ansible-playbook plays/apply_logstore.yml
 ssh -F env-ssh.cfg admin@consul-master-0
 consul members
 
+ssh -F env-ssh.cfg admin@logstore-0 -L 9000:localhost:9000
+# open your browser at this address : http://localhost:9000/sources#3600
 ...
 
 ansible-playbook plays/destroy.yml -e layer_name=main
