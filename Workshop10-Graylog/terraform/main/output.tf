@@ -11,5 +11,5 @@ output "consul_clients" {
 }
 
 output "logstores" {
-  value = ["${aws_instance.logstores.*.public_ip}"]
+  value = ["${aws_instance.logstores.*.private_ip}"]
 }

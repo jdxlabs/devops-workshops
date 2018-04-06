@@ -351,9 +351,10 @@ resource "aws_instance" "logstores" {
     device_name = "${var.instances_logstores["ebs_hdd_name"]}"
   }
 
-  subnet_id = "${aws_subnet.public_subnet.id}"
+  subnet_id = "${aws_subnet.private_subnet.id}"
 
   vpc_security_group_ids = [
+    "${aws_security_group.bastion_realm.id}",
     "${aws_security_group.logstore_ingress.id}",
   ]
 
@@ -364,6 +365,4 @@ resource "aws_instance" "logstores" {
   tags {
     Name = "${var.project_name}-${var.initials}-logstore-${count.index}"
   }
-
-  associate_public_ip_address = true
 }
