@@ -213,7 +213,6 @@ cd ./Workshop09-Vault
 ansible-playbook plays/build.yml -e layer_name=main
 ansible-playbook plays/apply_consul.yml
 ansible-playbook plays/apply_vault.yml
-ansible-playbook plays/vault_init.yml
 
 ssh -F env-ssh.cfg admin@vault-server-0
 consul members
