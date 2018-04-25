@@ -1,2 +1,3 @@
 ---
 graylog_input_syslogudp_port: 5001
+graylog_input_gelfhttp_port: 12201

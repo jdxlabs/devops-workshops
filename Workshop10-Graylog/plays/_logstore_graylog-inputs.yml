@@ -24,6 +24,20 @@
         allow_override_date: true
         bind_address: "0.0.0.0"
         store_full_message: false
+    graylog_input_gelf_name: "GelfHTTP"
+    graylog_input_gelf:
+      title: "{{ graylog_input_gelf_name }}"
+      type: "org.graylog2.inputs.gelf.http.GELFHttpInput"
+      global: true
+      configuration:
+        expand_structured_data: false
+        recv_buffer_size: 1048576
+        port: "{{ graylog_input_gelfhttp_port }}"
+        override_source: null
+        force_rdns: false
+        allow_override_date: true
+        bind_address: "0.0.0.0"
+        store_full_message: false
 
   tasks:
     - name: wait for Graylog server to startup
@@ -64,3 +78,14 @@
         force_basic_auth: yes
         status_code: 200,201
       when: not graylog_input_syslog_name in (inputs.json | json_query('inputs[*].title'))
+
+    - name: create the input for Gelf HTTP
+      uri:
+        url: http://127.0.0.1:9000/api/system/inputs
+        method: POST
+        body: "{{ graylog_input_gelf }}"
+        body_format: json
+        url_username: "{{ token.json.session_id }}"
+        url_password: session
+        force_basic_auth: yes
+        status_code: 200,201

@@ -134,6 +134,13 @@ resource "aws_security_group" "logstore_ingress" {
   }
 
   ingress {
+    from_port       = 12201
+    to_port         = 12201
+    protocol        = "TCP"
+    security_groups = ["${aws_security_group.bastion_realm.id}"]
+  }
+
+  ingress {
     from_port   = 9000
     to_port     = 9000
     protocol    = "TCP"
