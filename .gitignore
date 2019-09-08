@@ -7,3 +7,6 @@
 
 # editors
 .vscode/
+
+# python
+venv
