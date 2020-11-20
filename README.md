@@ -9,7 +9,6 @@ Instructions are avaibable in each workshop's folder.
 
 * Bash v4+
 * Docker v19.03.2+
-* Aws cli v1.16.169+, with an aws access configurer
 * A ssh key created for the workshops
 
 ```
